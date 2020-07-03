@@ -1,8 +1,11 @@
 #pragma once
 
 //Includes---------------------------------------------------------------------
+#include "TimerOverride.h"
 
 //Types------------------------------------------------------------------------
+typedef void (*LoggerFatalHook)(const char *error_line);
+
 class Logger
 {
 public:

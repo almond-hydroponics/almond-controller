@@ -1,7 +1,7 @@
 #pragma once
 
 //Includes---------------------------------------------------------------------
-#include <cstdint>
+#include "AlmondPrecompiled.h"
 #include <type_traits>
 
 

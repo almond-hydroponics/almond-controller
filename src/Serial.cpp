@@ -6,6 +6,8 @@ static const int BUFFER_SIZE = 64;
 
 static char BUFFER[BUFFER_SIZE];
 
+
+//Implementation---------------------------------------------------------------
 void serial_setup(const char *name, int baudrate)
 {
 	Serial.begin(baudrate);

@@ -60,9 +60,9 @@ void Logger::log(Logger::Level level,
 	va_list argument_list;
 	va_start (argument_list, format_flash);
 
-	char *buf = &buffer[line_loop * max_line_len];
+	char *buff = &buffer[line_loop * max_line_len];
 
-	memset(buf, 0x00, max_line_len);
+	memset(buff, 0x00, max_line_len);
 	// make the level visible
 	const char log_level_desc[] = {'D', 'I', 'W', 'E', 'F'};
 
@@ -72,7 +72,7 @@ void Logger::log(Logger::Level level,
 	// the last zero will never get overwritten
 	strncpy_P(format, (const char *)format_flash, max_line_len - 1);
 
-	int prefix_len = snprintf(buf,
+	int prefix_len = snprintf(buff,
 							  max_line_len,
 							  "[%02u:%02u:%02u] %c:",
 							  uptime.hours,
@@ -82,7 +82,7 @@ void Logger::log(Logger::Level level,
 
 
 	// fits or not, we have zeroed the whole thing so there will be ending zero.
-	int print_len = vsnprintf(buf + prefix_len,
+	int print_len = vsnprintf(buff + prefix_len,
 							  max_line_len - prefix_len - 1,
 							  format,
 							  argument_list);
@@ -99,7 +99,7 @@ void Logger::log(Logger::Level level,
 		line_loop = 0;
 
 	if (serial_baudrate > 0) {
-		serial_print_raw(buf, buffer_len, true);
+		serial_print_raw(buff, buffer_len, true);
 	}
 
 	if (level == Logger::Level::FATAL)
@@ -107,7 +107,7 @@ void Logger::log(Logger::Level level,
 
 	if (level == Logger::Level::FATAL || level == Logger::Level::ERROR) {
 		if (this->fatal_hook != nullptr)
-			this->fatal_hook(buf);
+			this->fatal_hook(buff);
 	}
 }
 
