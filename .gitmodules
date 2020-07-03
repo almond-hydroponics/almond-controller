@@ -1,0 +1,9 @@
+[submodule "external/RTClib"]
+	path = external/RTClib
+	url = https://github.com/adafruit/RTClib.git
+[submodule "external/ACS712-arduino"]
+	path = external/ACS712-arduino
+	url = https://github.com/rkoptev/ACS712-arduino.git
+[submodule "external/sht-sensor-lib"]
+	path = external/sht-sensor-lib
+	url = https://github.com/almond-hydroponics/sht-sensor-lib
