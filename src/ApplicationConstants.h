@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <type_traits>
 
+
+//Types------------------------------------------------------------------------
 template<typename E>
 constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type
 {
@@ -57,7 +59,7 @@ struct Config_mqtt
 	const char *mqtt_password;
 };
 
-struct Config
+struct Constants
 {
 	Config_email email;
 	Config_wlan wlan;
@@ -69,7 +71,7 @@ struct Config
 	uint8_t timezone_h;
 };
 
-extern const Config CONFIG;
+extern const Constants CONSTANTS;
 
 // Hardware configurations fixed pins
 #define PIN_RTC_SCL 14	// board pin 5
