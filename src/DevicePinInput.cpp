@@ -4,10 +4,12 @@
 
 
 //Implementation---------------------------------------------------------------
-DevicePinInput::DevicePinInput(const char *name,
-							   uint8_t pin,
-							   uint8_t filter_len,
-							   bool invert)
+DevicePinInput::DevicePinInput(
+	const char *name,
+	uint8_t pin,
+	uint8_t filter_len,
+	bool invert
+)
 	:
 	DeviceInput(name)
 {

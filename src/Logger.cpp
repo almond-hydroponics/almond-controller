@@ -72,20 +72,24 @@ void Logger::log(Logger::Level level,
 	// the last zero will never get overwritten
 	strncpy_P(format, (const char *)format_flash, max_line_len - 1);
 
-	int prefix_len = snprintf(buff,
-							  max_line_len,
-							  "[%02u:%02u:%02u] %c:",
-							  uptime.hours,
-							  uptime.minutes,
-							  uptime.seconds,
-							  log_level_desc[to_integral(level)]);
+	int prefix_len = snprintf(
+		buff,
+		max_line_len,
+		"[%02u:%02u:%02u] %c:",
+		uptime.hours,
+		uptime.minutes,
+		uptime.seconds,
+		log_level_desc[to_integral(level)]
+	);
 
 
 	// fits or not, we have zeroed the whole thing so there will be ending zero.
-	int print_len = vsnprintf(buff + prefix_len,
-							  max_line_len - prefix_len - 1,
-							  format,
-							  argument_list);
+	int print_len = vsnprintf(
+		buff + prefix_len,
+		max_line_len - prefix_len - 1,
+		format,
+		argument_list
+	);
 
 	int buffer_len = prefix_len + print_len;
 

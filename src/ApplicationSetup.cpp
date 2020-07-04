@@ -2,6 +2,8 @@
 #include "AlmondPrecompiled.h"
 #include "ApplicationSetup.h"
 #include "ApplicationConstants.h"
+#include <ArduinoOTA.h>
+#include <ESP8266mDNS.h>
 #include "Logger.h"
 
 ApplicationSetup APPLICATION_SETUP;

@@ -10,13 +10,15 @@
 //Types------------------------------------------------------------------------
 class DevicePinInput: public DeviceInput
 {
-	public:
+public:
 	static const int poll_interval = 100;
 
-	DevicePinInput(const char *name,
-				  uint8_t pin,
-				  uint8_t filter_len,
-				  bool invert);
+	DevicePinInput(
+		const char *name,
+		uint8_t pin,
+		uint8_t filter_len,
+		bool invert
+	);
 	void setup() override;
 	void loop() override;
 

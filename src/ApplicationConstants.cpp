@@ -32,7 +32,7 @@ const Constants CONSTANTS = {
 		.mqtt_user = "",
 		.mqtt_password = ""
 	},
-	.hostname = "",
+	.hostname = "almond",
 	.password = "",
 	.timezone_h = 3,
 	.baudrate = 115200

@@ -20,7 +20,7 @@ void TimerOverride::reset_with_carry(unsigned long timeout_ms)
 	this->reset_ms = reset_ms + timeout_ms;
 }
 
-unsigned long TimerOverride::elapsed()
+unsigned long TimerOverride::elapsed() const
 {
 	unsigned long current_time = millis();
 	if (current_time >= reset_ms)
@@ -30,7 +30,7 @@ unsigned long TimerOverride::elapsed()
 	return (ULONG_MAX - reset_ms) + current_time;
 }
 
-bool TimerOverride::check(unsigned long timeout_ms)
+bool TimerOverride::check(unsigned long timeout_ms) const
 {
 	unsigned long target_time = this->reset_ms + timeout_ms;
 	unsigned long current_time = millis();

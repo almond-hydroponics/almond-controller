@@ -40,11 +40,13 @@ void DeviceInput::update_value(int new_value)
 
 int Device::jsonify(char *buffer, int buffer_len)
 {
-	int len = snprintf(buffer,
-					   buffer_len,
-					   R"({"name":"%s","value":%d})",
-					   name,
-					   value);
+	int len = snprintf(
+		buffer,
+		buffer_len,
+		R"({"name":"%s","value":%d})",
+		name,
+		value
+	);
 	if (len >= buffer_len) {
 		LOG_ERROR("Jsonify: too long on '%s'", name);
 		return 0;
