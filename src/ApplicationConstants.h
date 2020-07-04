@@ -1,5 +1,6 @@
 #pragma once
 
+
 //Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
 #include <type_traits>
