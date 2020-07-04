@@ -7,6 +7,7 @@ class Device
 public:
 	/// Initialize the device, the @param name must point to valid memory at all times.
 	explicit Device(const char *name);
+	virtual ~Device() = default;
 
 	/// Return json string like '"led" : { "value" : 1}}'. @returns the length of the added content.
 	virtual int jsonify(char *buffer, int buffer_len);

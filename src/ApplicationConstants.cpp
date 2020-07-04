@@ -35,5 +35,6 @@ const Constants CONSTANTS = {
 	.hostname = "",
 	.password = "",
 	.timezone_h = 3,
+	.baudrate = 115200
 };
 
