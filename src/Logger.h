@@ -2,6 +2,7 @@
 
 
 //Includes---------------------------------------------------------------------
+#include <ESP8266WiFi.h>
 #include "TimerOverride.h"
 
 

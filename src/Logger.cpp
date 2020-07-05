@@ -53,9 +53,7 @@ void get_uptime(InfoUptime *uptime)
 	uptime->hours = c_h;
 }
 
-void Logger::log(Logger::Level level,
-				 const __FlashStringHelper *format_flash,
-				 ...)
+void Logger::log(Logger::Level level, const __FlashStringHelper *format_flash, ...)
 {
 	va_list argument_list;
 	va_start (argument_list, format_flash);

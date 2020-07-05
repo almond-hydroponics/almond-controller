@@ -3,11 +3,14 @@
 
 //Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
+#include <ESP8266WiFi.h>
 #include "ApplicationConstants.h"
 #include "ApplicationSetup.h"
 #include "SetupWifi.h"
 #include "Logger.h"
 #include "SecureCredentials.h"
+#include "Globals.h"
+#include "../lib/sht-sensor-lib/sht21.h"
 
 
 #ifndef STASSID
@@ -15,9 +18,8 @@
 #define STAPSK  CONSTANTS.wlan.password
 #endif
 
-const char* ssid = STASSID;
-const char* password = STAPSK;
-
+const char *ssid = STASSID;
+const char *password = STAPSK;
 
 //Declarations-----------------------------------------------------------------
 SetupWifi setupWifi(
@@ -28,6 +30,7 @@ SetupWifi setupWifi(
 	CLIENT_KEY_PROG
 );
 
+SHT21 sht;
 
 //Implementation---------------------------------------------------------------
 static void logger_fatal_hook(const char *log_line)
@@ -70,10 +73,14 @@ static void logger_fatal_hook(const char *log_line)
 void setup()
 {
 	// SETUP ESP8266 DEVICE
+#ifdef DEBUG
 	LOG.setup_serial(CONSTANTS.hostname, CONSTANTS.baudrate);
+#endif
+
 	LOG.setup_led(PIN_LED);
 	LOG.setup_fatal_hook(logger_fatal_hook);
 	ApplicationSetup::setup();
+	sht.begin();
 	setupWifi.setupWifi();
 }
 
@@ -83,4 +90,10 @@ void loop()
 	setupWifi.loopWifi();
 	// if wifi is not ready, don't do any other processing
 	if (!setupWifi.isReadyForProcessing()) return;
+
+	float humid = sht.readHumidity();
+	float temp = sht.readTemperature();
+
+	Serial.printf("Temp: %f, Humid: %f \n", temp, humid);
+	delay(2000);
 }

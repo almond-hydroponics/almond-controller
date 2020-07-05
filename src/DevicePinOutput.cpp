@@ -4,7 +4,11 @@
 
 
 //Implementation---------------------------------------------------------------
-DevicePinOutput::DevicePinOutput(const char *name, uint8_t pin, bool invert)
+DevicePinOutput::DevicePinOutput(
+	const char *name,
+	uint8_t pin,
+	bool invert
+)
 	:
 	DeviceOutput(name)
 {

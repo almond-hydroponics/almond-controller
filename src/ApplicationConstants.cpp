@@ -13,8 +13,8 @@ const Constants CONSTANTS = {
 		.receiver = "",
 	},
 	.wlan = {
-		.ssid = "",
-		.password = "",
+		.ssid = "Masha",
+		.password = "20021988",
 	},
 	.runtable = {    // Run the pump for 1min every 15min from 7:00 to 20:00
 		.active_start = {.hour = 7, .minute = 0, .second = 0},
