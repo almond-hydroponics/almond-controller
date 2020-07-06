@@ -12,6 +12,7 @@
 #include "EnvironmentSht.h"
 #include "SetupWifi.h"
 #include "Webserver.h"
+#include "SendEmail.h"
 #include "Logger.h"
 #include "SecureCredentials.h"
 #include "Globals.h"
@@ -40,7 +41,9 @@ SetupWifi setupWifi(
 	CLIENT_KEY_PROG
 );
 
-Device *const DEVICES[] = { &DEV_TEMP, &DEV_HUMID, &DEV_WLEVEL };
+Device *const DEVICES[] = {&DEV_TEMP, &DEV_HUMID, &DEV_WLEVEL};
+#define DEVICES_N (sizeof(DEVICES)/sizeof(Device*))
+
 
 //Implementation---------------------------------------------------------------
 static void logger_fatal_hook(const char *log_line)
@@ -74,11 +77,82 @@ static void logger_fatal_hook(const char *log_line)
 		CONSTANTS.hostname
 	);
 
-//	email_send(&CONSTANTS.email, CONSTANTS.email.receiver, subject, buffer);
+	email_send(&CONSTANTS.email, CONSTANTS.email.receiver, subject, buffer);
 
 	free(subject);
 	free(buffer);
 }
+
+static int generate_device_json(char *buffer)
+{
+	strcpy(buffer, "{\"dev\":[");
+	int buffer_offset = strlen(buffer);
+	unsigned int loop;
+	for (loop = 0; loop < DEVICES_N; loop++) {
+		Device *dev = DEVICES[loop];
+		int added = dev->jsonify(
+			buffer + buffer_offset,
+			WEBSERVER_MAX_RESPONSE_SIZE - buffer_offset
+		);
+
+		if (added == 0) break;
+
+		buffer_offset += added;
+
+		if (buffer_offset + 2 >= WEBSERVER_MAX_RESPONSE_SIZE) break;
+
+		buffer[buffer_offset] = ',';
+		buffer[buffer_offset + 1] = 0;
+		buffer_offset += 1;
+	}
+
+	if (loop < DEVICES_N) {
+		// exited with break
+		return 0;
+	} else {
+		buffer[buffer_offset - 1] = ']';
+		buffer[buffer_offset] = '}';
+		buffer[buffer_offset + 1] = 0;
+		return (buffer_offset + 1);
+	}
+}
+
+static void handle_get_devices()
+{
+	char *buffer = webserver_get_buffer();
+
+	if (buffer == nullptr) return;
+
+	int blen = generate_device_json(buffer);
+
+	if (blen == 0) {
+		WEBSERVER.send(500, "application/json", R"({"error":"out of buffer"})");
+	} else {
+		WEBSERVER.send(200, "application/json", buffer);
+	}
+	free(buffer);
+}
+
+void handle_get_time()
+{
+	Config_run_table_time time{};
+	char *buffer = webserver_get_buffer();
+	if (buffer == nullptr) return;
+
+	DEV_RTC.time_of_day(&time);
+
+	snprintf(
+		buffer,
+		WEBSERVER_MAX_RESPONSE_SIZE,
+		R"({"hour":%d,"min":%d,"sec":%d})",
+		time.hour,
+		time.minute,
+		time.second
+	);
+	WEBSERVER.send(200, "application/json", buffer);
+	free(buffer);
+}
+
 
 void setup()
 {
@@ -96,7 +170,8 @@ void setup()
 
 	Logger::set_status(Logger::Status::RUNNING);
 
-	WEBSERVER.on("/get/dev",)
+	WEBSERVER.on("/get/dev", handle_get_devices);
+	WEBSERVER.on("/get/time", handle_get_time);
 }
 
 void loop()
@@ -123,7 +198,11 @@ void loop()
 	Config_run_table_time time_now{};
 	DEV_RTC.time_of_day(&time_now);
 
-	Serial.printf("Temp: %d, Humid: %d \n", DEV_TEMP.get_value(), DEV_HUMID.get_value());
+	Serial.printf(
+		"Temp: %d, Humid: %d \n",
+		DEV_TEMP.get_value(),
+		DEV_HUMID.get_value()
+	);
 	Serial.printf("Distance: %d \n", DEV_WLEVEL.get_value());
 	Serial.printf("Time: %wint_t \n", &time_now);
 //	Serial.printf("Temp: %d \n", DEV_TEMP.get_value());
