@@ -13,6 +13,10 @@
 #include "SetupWifi.h"
 #include "Webserver.h"
 #include "SendEmail.h"
+#include "NtpClient.h"
+#include "Serial.h"
+#include "DevicePinInput.h"
+#include "DevicePinOutput.h"
 #include "Logger.h"
 #include "SecureCredentials.h"
 #include "Globals.h"
@@ -26,11 +30,14 @@
 const char *ssid = STASSID;
 const char *password = STAPSK;
 
+
 //Declarations-----------------------------------------------------------------
 DeviceRtc			DEV_RTC("rtc");
 WaterLevel			DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO);
 EnvironmentSht		DEV_TEMP("temp");
 EnvironmentSht		DEV_HUMID("humid");
+DevicePinOutput		DEV_PUMP("pump", PIN_PUMP, false);
+DevicePinInput		DEV_SWITCH("switch", PIN_SWITCH, 8, true);
 ApplicationLogic	APPLICATION_LOGIC;
 
 SetupWifi setupWifi(
@@ -41,7 +48,33 @@ SetupWifi setupWifi(
 	CLIENT_KEY_PROG
 );
 
-Device *const DEVICES[] = {&DEV_TEMP, &DEV_HUMID, &DEV_WLEVEL};
+static const int UPDATE_DELAY = 20;
+static const int FATAL_REBOOT_DELAY = 2250.0;
+
+static TimerOverride	Local_reset_fatal_timer;
+static bool				Local_reset_fatal_timer_started = false;
+
+
+/** Make some artificial devices for more information */
+class Device_uptime : public DeviceInput
+{
+public:
+	Device_uptime() : DeviceInput("uptime") {};
+	void loop() override { this->value = millis()/1000; } ;
+};
+
+
+class Device_status : public DeviceInput
+{
+public:
+	Device_status() : DeviceInput("status") {};
+	void loop() override { this->value = (int)LOG.get_status(); } ;
+};
+
+Device_uptime DEV_UPTIME;
+Device_status DEV_STATUS;
+
+Device *const DEVICES[] = {&DEV_TEMP, &DEV_HUMID, &DEV_WLEVEL, &DEV_PUMP, &DEV_UPTIME, &DEV_RTC, &DEV_STATUS, &DEV_SWITCH};
 #define DEVICES_N (sizeof(DEVICES)/sizeof(Device*))
 
 
@@ -133,6 +166,56 @@ static void handle_get_devices()
 	free(buffer);
 }
 
+static bool handle_set_email()
+{
+	LOG_INFO("Status email requested.");
+	const int subject_len = 256;
+	char *subject = (char *)malloc(subject_len);
+	char *buffer = (char *)malloc(WEBSERVER_MAX_RESPONSE_SIZE);
+
+	memset(subject, 0x00, subject_len);
+	memset(buffer, 0x00, WEBSERVER_MAX_RESPONSE_SIZE);
+
+	snprintf(
+		subject,
+		subject_len,
+		"[ESP] %s : Status report",
+		CONSTANTS.hostname
+	);
+
+	int blen = generate_device_json(buffer);
+	serial_print_raw(buffer, blen, true);
+	bool ret = email_send(&CONSTANTS.email, CONSTANTS.email.receiver, subject, buffer);
+
+	free(subject);
+	free(buffer);
+
+	return ret;
+}
+
+static bool handle_set_ntp()
+{
+	uint32_t ntp_time = ntp_update();
+	if (ntp_time == 0) return false;
+
+	DeviceRtc::update_time(ntp_time);
+
+	return true;
+}
+
+static void handle_http(bool ret)
+{
+	char *buffer = webserver_get_buffer();
+	if (buffer == nullptr) return;
+
+	int resp_code = ret ? 200 : 500;
+	const char *code = ret ? "ok" : "err";
+
+	snprintf(buffer, WEBSERVER_MAX_RESPONSE_SIZE, R"({"status":"%s"})", code);
+	WEBSERVER.send(resp_code, "application/json", buffer);
+	free(buffer);
+}
+
 void handle_get_time()
 {
 	Config_run_table_time time{};
@@ -153,6 +236,24 @@ void handle_get_time()
 	free(buffer);
 }
 
+static bool handle_reboot()
+{
+	LOG_INFO("Reboot requested: Reboot now!");
+	ESP.restart();
+
+	return true;
+}
+
+void add_password_protected(const char *url, void (*handler)())
+{
+	char *buffer = (char *)malloc(1024);
+	strcpy(buffer, "/set/");
+	strcat(buffer, CONSTANTS.password);
+	strcat(buffer, "/");
+	strcat(buffer, url);
+	WEBSERVER.on(buffer, handler);
+	free(buffer);
+}
 
 void setup()
 {
@@ -172,11 +273,36 @@ void setup()
 
 	WEBSERVER.on("/get/dev", handle_get_devices);
 	WEBSERVER.on("/get/time", handle_get_time);
+	add_password_protected("ntp", []{ handle_http(handle_set_ntp()); });
+	add_password_protected("reboot", []{ handle_http(handle_reboot()); });
 }
+
+#ifndef NDEBUG
+static void handle_serial()
+{
+	int line_len;
+	char *line = serial_receive(&line_len);
+
+	if (line == nullptr) return;
+
+	LOG_WARN("Serial: %s ", line);
+
+	if (strcmp(line, "email") == 0) {
+		handle_set_email();
+	} else {
+		serial_print("Invalid command\n");
+	}
+}
+#endif
 
 void loop()
 {
 	LOG.loop();
+
+	#ifndef NDEBUG
+	handle_serial();
+	#endif
+
 	static TimerOverride update_timer;
 	static bool update_when_elapsed = false;
 	static unsigned long avail_memory_last = 0xFFFF;
@@ -204,7 +330,11 @@ void loop()
 		DEV_HUMID.get_value()
 	);
 	Serial.printf("Distance: %d \n", DEV_WLEVEL.get_value());
-	Serial.printf("Time: %wint_t \n", &time_now);
+//	DEBUG_LOGLN(asctime(&time_now));
 //	Serial.printf("Temp: %d \n", DEV_TEMP.get_value());
-	delay(2000);
+//	delay(5000);
+
+	if (LOG.get_status() == Logger::Status::ERROR) {
+		if (LOCAL_res)
+	}
 }

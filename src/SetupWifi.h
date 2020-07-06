@@ -2,7 +2,10 @@
 
 
 //Includes---------------------------------------------------------------------
-//#include <ESP8266WiFi.h>
+#include "AlmondPrecompiled.h"
+#include <ESP8266WiFi.h>
+#include <ESP8266httpUpdate.h>
+#include <ESP8266WiFiMulti.h>
 #include "AsyncWait.h"
 
 
@@ -46,6 +49,7 @@ public:
 	static String getMacAddress();
 	void setupWifi();
 	void loopWifi();
+	static void wifiLedOnConnect();
 
 private:
 	const char *ssid;

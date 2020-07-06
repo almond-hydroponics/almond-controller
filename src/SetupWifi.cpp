@@ -1,8 +1,5 @@
 //Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
-#include <ESP8266WiFi.h>
-#include <ESP8266httpUpdate.h>
-#include <ESP8266WiFiMulti.h>
 #include "SetupWifi.h"
 #include "Logger.h"
 #include "Globals.h"
@@ -44,7 +41,7 @@ void SetupWifi::setClock()
 		ntpServer2,
 		ntpServer3
 	);
-//	configTime(gmtOffset_sec, daylightOffset_sec, ntpServer1);
+
 	setClock_status = STARTED;
 	LOG_INFO("Waiting for NTP time sync: ");
 	setClock_AsyncWait.startWaiting(millis(), 1000);	// Log every 1 second
@@ -64,6 +61,8 @@ void SetupWifi::checkClockStatus()
 		}
 		return;
 	}
+
+	Serial.printf("Time: %s", reinterpret_cast<const char *>(now));
 
 	// The NTP request has completed
 	setClock_status = SUCCESS;
@@ -93,7 +92,7 @@ String SetupWifi::getMacAddress()
 	return macStr;
 }
 
-void wifiOnConnect()
+void SetupWifi::wifiLedOnConnect()
 {
 	digitalWrite(PIN_LED, HIGH);
 	delay(1000);
@@ -117,7 +116,7 @@ void SetupWifi::setupWifi()
 
 		int attempt = 0;
 		while (wifiMulti.run() != WL_CONNECTED) {
-			wifiOnConnect();
+			wifiLedOnConnect();
 			DEBUG_LOG(".");
 			DEBUG_LOG(attempt);
 			delay(500);
@@ -135,7 +134,7 @@ void SetupWifi::setupWifi()
 		DEBUG_LOGLN("");
 		DEBUG_LOGLN("WiFi connected");
 		DEBUG_LOG("IP address: ");
-		DEBUG_LOG(WiFi.localIP());
+		DEBUG_LOG(WiFi.localIP().toString().c_str());
 		//DEBUG_LOG(", MAC ");
 		//DEBUG_LOG(getMacAddress());
 		DEBUG_LOGLN("");
