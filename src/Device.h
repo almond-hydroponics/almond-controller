@@ -41,4 +41,3 @@ public:
 	/// @param value new value, @param verbose if set to true then will have log print if value changed
 	virtual void set_value(int value, bool verbose = false) = 0;
 };
-

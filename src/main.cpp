@@ -6,6 +6,10 @@
 #include <ESP8266WiFi.h>
 #include "ApplicationConstants.h"
 #include "ApplicationSetup.h"
+#include "ApplicationLogic.h"
+#include "DeviceRtc.h"
+#include "WaterLevel.h"
+#include "EnvironmentSht.h"
 #include "SetupWifi.h"
 #include "Logger.h"
 #include "SecureCredentials.h"
@@ -22,6 +26,12 @@ const char *ssid = STASSID;
 const char *password = STAPSK;
 
 //Declarations-----------------------------------------------------------------
+DeviceRtc			DEV_RTC("rtc");
+WaterLevel			DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO);
+EnvironmentSht		DEV_TEMP("temp");
+EnvironmentSht		DEV_HUMID("humid");
+ApplicationLogic	APPLICATION_LOGIC;
+
 SetupWifi setupWifi(
 	ssid,
 	password,
@@ -31,6 +41,8 @@ SetupWifi setupWifi(
 );
 
 SHT21 sht;
+
+Device *const DEVICES[] = { &DEV_TEMP, &DEV_HUMID, &DEV_WLEVEL };
 
 //Implementation---------------------------------------------------------------
 static void logger_fatal_hook(const char *log_line)
@@ -79,21 +91,39 @@ void setup()
 
 	LOG.setup_led(PIN_LED);
 	LOG.setup_fatal_hook(logger_fatal_hook);
-	ApplicationSetup::setup();
-	sht.begin();
+	APPLICATION_SETUP.setup();
 	setupWifi.setupWifi();
+
+	for (auto loop : DEVICES) loop->setup();
+
+//	for (auto loop : DEVICES) loop->setup();
+
+	Logger::set_status(Logger::Status::RUNNING);
 }
 
 void loop()
 {
 	LOG.loop();
+	static TimerOverride update_timer;
+	static bool update_when_elapsed = false;
+	static unsigned long avail_memory_last = 0xFFFF;
+	unsigned long avail_memory_now = APPLICATION_SETUP.get_free_heap();
+
+	if (avail_memory_now < avail_memory_last) {
+		LOG_INFO("Memory: %u", avail_memory_now);
+		avail_memory_last = avail_memory_now;
+	}
+
 	setupWifi.loopWifi();
 	// if wifi is not ready, don't do any other processing
 	if (!setupWifi.isReadyForProcessing()) return;
 
-	float humid = sht.readHumidity();
-	float temp = sht.readTemperature();
+	delay(10);
 
-	Serial.printf("Temp: %f, Humid: %f \n", temp, humid);
+	for (auto loop : DEVICES) loop->loop();
+
+	Serial.printf("Temp: %d, Humid: %d \n", DEV_TEMP.get_value(), DEV_HUMID.get_value());
+	Serial.printf("Distance: %d \n", DEV_WLEVEL.get_value());
+//	Serial.printf("Temp: %d \n", DEV_TEMP.get_value());
 	delay(2000);
 }

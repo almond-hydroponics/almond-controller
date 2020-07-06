@@ -151,8 +151,7 @@ bool ApplicationLogic::run_logic(
 {
 	loop_measurement(water_switch);
 
-	if (!poll_timer.check(poll_interval))
-		return false;
+	if (!poll_timer.check(poll_interval)) return false;
 
 	poll_timer.reset();
 
@@ -171,10 +170,11 @@ bool ApplicationLogic::run_logic(
 
 	LogicStatus new_status = calculate_status(pump_value, water_switch);
 
-	if (new_status == status)
-		return false;
+	if (new_status == status) return false;
+
 	int new_status_int = to_integral(new_status);
 	LOG_INFO("PLogic new status:  %d", new_status_int);
+
 	status = new_status;
 	if (output->get_value() != pump_value) {
 		pump_timer.reset();

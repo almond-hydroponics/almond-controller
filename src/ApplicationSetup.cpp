@@ -9,9 +9,11 @@ const int16_t I2C_SLAVE = 0x08;
 
 ApplicationSetup APPLICATION_SETUP;
 
+
+//Implementation---------------------------------------------------------------
 void ApplicationSetup::setup()
 {
-	ApplicationSetup::setup_i2c();
+	this->setup_i2c();
 }
 
 unsigned int ApplicationSetup::get_free_heap()

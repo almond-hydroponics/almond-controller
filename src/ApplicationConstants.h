@@ -78,8 +78,8 @@ extern const Constants CONSTANTS;
 // Hardware configurations fixed pins
 #define PIN_SCL    14	// board pin 5
 #define PIN_SDA    12	// board pin 6
-#define PIN_LED    15	// board pin 8
-#define PIN_PUMP    4	// board pin 2
+#define PIN_PUMP    15	// board pin 8
+#define PIN_LED    4	// board pin 2
 #define PIN_SWITCH  16	// board pin 0
 #define PIN_TRIGGER 2	// board pin 4
 #define PIN_ECHO    5	// board pin 1

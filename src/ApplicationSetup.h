@@ -6,9 +6,8 @@
 class ApplicationSetup
 {
 public:
-	static void setup();
-
-	static unsigned int get_free_heap();
+	void setup();
+	unsigned int get_free_heap();
 
 protected:
 	static void setup_i2c();

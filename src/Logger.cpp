@@ -80,7 +80,6 @@ void Logger::log(Logger::Level level, const __FlashStringHelper *format_flash, .
 		log_level_desc[to_integral(level)]
 	);
 
-
 	// fits or not, we have zeroed the whole thing so there will be ending zero.
 	int print_len = vsnprintf(
 		buff + prefix_len,

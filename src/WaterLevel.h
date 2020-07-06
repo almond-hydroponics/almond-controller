@@ -13,8 +13,8 @@ public:
 	static const int measure_interval = 10000;
 
 	WaterLevel(const char *name, uint8_t pin_trigger, uint8_t pin_echo);
-	void loop() override;
 	void setup() override;
+	void loop() override;
 
 protected:
 	void measure_pulse_in();

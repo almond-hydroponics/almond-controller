@@ -113,7 +113,7 @@ void SetupWifi::setupWifi()
 
 		WiFi.mode(WIFI_STA);
 		wifiMulti.addAP(ssid, password);
-//		wifiMulti.addAP("Masha", "20021988");
+		wifiMulti.addAP("Valar Morghulis", "valardohaeris14#");
 
 		int attempt = 0;
 		while (wifiMulti.run() != WL_CONNECTED) {
@@ -123,7 +123,7 @@ void SetupWifi::setupWifi()
 			delay(500);
 			attempt++;
 
-			if (attempt == 100) {
+			if (attempt == 50) {
 				DEBUG_LOGLN("");
 				DEBUG_LOGLN("Could not connect to WiFi");
 
@@ -143,7 +143,7 @@ void SetupWifi::setupWifi()
 		setClock();
 
 		DEBUG_LOGLN("Ready.");
-		digitalWrite(PIN_LED, HIGH);
+		digitalWrite(PIN_LED, LOW);
 		//DEBUG_LOG("IP address: ");
 		//DEBUG_LOGLN(WiFi.localIP());
 	}
