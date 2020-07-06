@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Almond</title>
+  <link href="/data/style.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="/data/supa.js"></script>
+
+</head>
+<body>
+<nav class="nav" tabindex="-1" onclick="this.focus()">
+  <div class="container">
+    <a class="pagename current" href="#" onclick="update_all();"> Almond</a>
+  </div>
+</nav>
+<div class="container">
+
+  <h1> Status </h1>
+  <table class="table">
+
+    <tbody>
+    <tr>
+      <th width="30%">Status</th>
+      <td id="data_status_status"></td>
+    </tr>
+    <tr>
+      <th>Uptime</th>
+      <td id="data_status_uptime"></td>
+    </tr>
+    <tr>
+      <th>Local time</th>
+      <td id="data_status_time"></td>
+    </tr>
+    </tbody>
+  </table>
+
+
+  <h1> Devices </h1>
+  <table class="table">
+    <thead>
+    <tr>
+      <th width="30%">Name</th>
+      <th>Status</th>
+    </thead>
+    <tbody id="data_dev"></tbody>
+  </table>
+
+  <h1> Log </h1>
+  <p id="data_log"></p>
+
+</div>
+
+
+<script type="text/javascript">
+
+  function get_target(elem) {
+    return document.getElementById("data_" + elem);
+  };
+
+  function time_to_str(jobj) {
+    return jobj.hour + ":" + jobj.min + ":" + jobj.sec;
+  }
+
+  function update_status() {
+    make_json_request("/get/status", function (jobj) {
+
+      get_target("status_status").innerHTML = jobj.status;
+      get_target("status_uptime").innerHTML = time_to_str(jobj);
+    });
+  };
+
+
+  function update_time() {
+    make_json_request("/get/time", function (jobj) {
+
+      get_target("status_time").innerHTML = time_to_str(jobj);
+    });
+  };
+
+  function update_devices() {
+    make_json_request("/get/dev", function (jobj) {
+      var text = "";
+      var entries = jobj.dev;
+      for (var loop = 0; loop < entries.length; loop++) {
+        var item = entries[loop];
+        text = text + "<tr><td>" + item.name + "</td><td>" + item.value + "</td></tr>"
+      }
+      get_target("dev").innerHTML = text;
+    });
+  }
+
+  function update_log() {
+    make_json_request("/get/log", function (jobj) {
+      var entries = jobj.log;
+      var text = "";
+      for (var loop = 0; loop < entries.length; loop++) {
+        text = text + entries[loop] + "\n"
+      }
+      get_target("log").innerHTML = "<pre>" + text + "</pre>";
+    });
+  };
+
+  function update_all() {
+    update_status();
+    update_devices();
+    update_log();
+    update_time();
+  }
+
+  update_all();
+</script>
+</body>
+</html>

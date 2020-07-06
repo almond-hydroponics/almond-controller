@@ -11,10 +11,10 @@
 #include "WaterLevel.h"
 #include "EnvironmentSht.h"
 #include "SetupWifi.h"
+#include "Webserver.h"
 #include "Logger.h"
 #include "SecureCredentials.h"
 #include "Globals.h"
-#include "../lib/sht-sensor-lib/sht21.h"
 
 
 #ifndef STASSID
@@ -39,8 +39,6 @@ SetupWifi setupWifi(
 	CLIENT_CERT_PROG,
 	CLIENT_KEY_PROG
 );
-
-SHT21 sht;
 
 Device *const DEVICES[] = { &DEV_TEMP, &DEV_HUMID, &DEV_WLEVEL };
 
@@ -96,9 +94,9 @@ void setup()
 
 	for (auto loop : DEVICES) loop->setup();
 
-//	for (auto loop : DEVICES) loop->setup();
-
 	Logger::set_status(Logger::Status::RUNNING);
+
+	WEBSERVER.on("/get/dev",)
 }
 
 void loop()
@@ -122,8 +120,12 @@ void loop()
 
 	for (auto loop : DEVICES) loop->loop();
 
+	Config_run_table_time time_now{};
+	DEV_RTC.time_of_day(&time_now);
+
 	Serial.printf("Temp: %d, Humid: %d \n", DEV_TEMP.get_value(), DEV_HUMID.get_value());
 	Serial.printf("Distance: %d \n", DEV_WLEVEL.get_value());
+	Serial.printf("Time: %wint_t \n", &time_now);
 //	Serial.printf("Temp: %d \n", DEV_TEMP.get_value());
 	delay(2000);
 }

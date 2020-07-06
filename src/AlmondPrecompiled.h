@@ -10,3 +10,6 @@
 #include <climits>
 #include <ctime>
 #include <cstdint>
+#include "FS.h"
+#include <WiFiClientSecure.h>
+#include "base64.h"

@@ -2,7 +2,6 @@
 #include "WaterLevel.h"
 #include "Logger.h"
 #include "ApplicationConstants.h"
-#include "Globals.h"
 
 
 //Implementation---------------------------------------------------------------
@@ -86,14 +85,4 @@ void WaterLevel::loop()
 	delayMicroseconds(10);
 	digitalWrite(this->pin_trigger, LOW);
 	measure_pulse_in();
-
-//	const unsigned long duration = pulseIn(PIN_ECHO, HIGH);
-//	int distance = duration/29/2;
-//
-//	if (duration == 0) {
-//		DEBUG_LOGLN("Warning: No pulse from the sensor");
-//		this->value = 0;
-//	} else {
-//		this->value = (int)distance;
-//	}
 }
