@@ -33,10 +33,10 @@ public:
 
 	virtual ~SetupWifi() = default;
 
-	WiFiClient &getWiFiClient()
-	{
-		return wifiClient;
-	}
+//	WiFiClient &getWiFiClient()
+//	{
+//		return wifiClient;
+//	}
 
 	bool isReadyForProcessing()
 	{

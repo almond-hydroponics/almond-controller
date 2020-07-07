@@ -5,7 +5,7 @@
 #include "AlmondPrecompiled.h"
 #include <ESP8266WiFi.h>
 #include "ApplicationConstants.h"
-#include "ApplicationSetup.h"
+#include "AlmondConfiguration.h"
 #include "ApplicationLogic.h"
 #include "DeviceRtc.h"
 #include "WaterLevel.h"
@@ -290,7 +290,7 @@ void setup()
 
 	LOG.setup_led(PIN_LED);
 	LOG.setup_fatal_hook(logger_fatal_hook);
-	APPLICATION_SETUP.setup();
+	ALMOND_CONFIGURATION.setup();
 	setupWifi.setupWifi();
 	webserver_setup();
 
@@ -333,7 +333,7 @@ void loop()
 	static TimerOverride update_timer;
 	static bool update_when_elapsed = false;
 	static unsigned long avail_memory_last = 0xFFFF;
-	unsigned long avail_memory_now = APPLICATION_SETUP.get_free_heap();
+	unsigned long avail_memory_now = ALMOND_CONFIGURATION.get_free_heap();
 
 	if (avail_memory_now < avail_memory_last) {
 		LOG_INFO("Memory: %u", avail_memory_now);

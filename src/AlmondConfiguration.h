@@ -4,17 +4,27 @@
 #include "AlmondPrecompiled.h"
 #include "ApplicationConstants.h"
 #include "Logger.h"
+#include "TimerOverride.h"
 
 
 //Types------------------------------------------------------------------------
-class ApplicationSetup
+class AlmondConfiguration
 {
 public:
 	void setup();
+	void loop();
+
+	bool connected();
 	unsigned int get_free_heap();
 
 protected:
+	bool wifi_ok;
+	TimerOverride wifi_lost_timer;
+
+	void setup_wifi();
 	static void setup_i2c();
+
+	void loop_wifi();
 };
 
-extern ApplicationSetup APPLICATION_SETUP;
+extern AlmondConfiguration ALMOND_CONFIGURATION;
