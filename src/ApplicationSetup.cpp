@@ -1,8 +1,5 @@
 //Includes---------------------------------------------------------------------
-#include "AlmondPrecompiled.h"
 #include "ApplicationSetup.h"
-#include "ApplicationConstants.h"
-#include "Logger.h"
 
 const int16_t I2C_MASTER = 0X42;
 const int16_t I2C_SLAVE = 0x08;

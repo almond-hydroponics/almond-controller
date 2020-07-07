@@ -1,10 +1,12 @@
 #pragma once
 
 //Includes---------------------------------------------------------------------
+#include "AlmondPrecompiled.h"
 #include "Device.h"
 #include "DeviceRtc.h"
 #include "TimerOverride.h"
 #include "ApplicationConstants.h"
+#include "Logger.h"
 
 
 //Types------------------------------------------------------------------------

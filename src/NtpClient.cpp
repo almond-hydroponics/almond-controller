@@ -1,8 +1,5 @@
 //Includes---------------------------------------------------------------------
-#include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
 #include "NtpClient.h"
-#include "Logger.h"
 
 
 //Declarations-----------------------------------------------------------------

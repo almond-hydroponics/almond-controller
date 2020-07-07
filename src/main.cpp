@@ -38,6 +38,7 @@ EnvironmentSht		DEV_TEMP("temp");
 EnvironmentSht		DEV_HUMID("humid");
 DevicePinOutput		DEV_PUMP("pump", PIN_PUMP, false);
 DevicePinInput		DEV_SWITCH("switch", PIN_SWITCH, 8, true);
+DevicePinInput		DEV_WDETECT("water_detect", PIN_WDETECT, 4, true);
 ApplicationLogic	APPLICATION_LOGIC;
 
 SetupWifi setupWifi(
@@ -74,13 +75,28 @@ public:
 Device_uptime DEV_UPTIME;
 Device_status DEV_STATUS;
 
-Device *const DEVICES[] = {&DEV_TEMP, &DEV_HUMID, &DEV_WLEVEL, &DEV_PUMP, &DEV_UPTIME, &DEV_RTC, &DEV_STATUS, &DEV_SWITCH};
+Device *const DEVICES[] = {
+	&DEV_TEMP,
+	&DEV_HUMID,
+	&DEV_WLEVEL,
+	&DEV_WDETECT,
+	&DEV_PUMP,
+	&DEV_UPTIME,
+	&DEV_RTC,
+	&DEV_STATUS,
+	&DEV_SWITCH
+};
 #define DEVICES_N (sizeof(DEVICES)/sizeof(Device*))
 
 
 //Implementation---------------------------------------------------------------
 static void logger_fatal_hook(const char *log_line)
 {
+	if (!Local_reset_fatal_timer_started) {
+		Local_reset_fatal_timer.reset();
+		Local_reset_fatal_timer_started = true;
+	}
+
 	// if we are not connected, we are not storing the messages for now.
 	if (!setupWifi.isReadyForProcessing()) return;
 
@@ -93,8 +109,7 @@ static void logger_fatal_hook(const char *log_line)
 	memset(subject, 0x00, subject_len);
 
 	// out of memory, lets skip the whole thing.
-	if (buffer == nullptr || subject == nullptr)
-		return;
+	if (buffer == nullptr || subject == nullptr) return;
 
 	snprintf(
 		buffer,
@@ -103,6 +118,7 @@ static void logger_fatal_hook(const char *log_line)
 		CONSTANTS.hostname,
 		log_line
 	);
+
 	snprintf(
 		subject,
 		subject_len - 1,
@@ -236,6 +252,16 @@ void handle_get_time()
 	free(buffer);
 }
 
+static bool handle_push_devices(bool force)
+{
+	int values[6];
+	for (unsigned int loop = 0; loop < 6; loop++)
+		values[loop] = DEVICES[loop]->get_value();
+	DEBUG_LOG("Push to azure: ");
+	DEBUG_LOGLN(force);
+	return force;
+}
+
 static bool handle_reboot()
 {
 	LOG_INFO("Reboot requested: Reboot now!");
@@ -266,6 +292,7 @@ void setup()
 	LOG.setup_fatal_hook(logger_fatal_hook);
 	APPLICATION_SETUP.setup();
 	setupWifi.setupWifi();
+	webserver_setup();
 
 	for (auto loop : DEVICES) loop->setup();
 
@@ -314,6 +341,8 @@ void loop()
 	}
 
 	setupWifi.loopWifi();
+	webserver_loop();
+
 	// if wifi is not ready, don't do any other processing
 	if (!setupWifi.isReadyForProcessing()) return;
 
@@ -335,6 +364,44 @@ void loop()
 //	delay(5000);
 
 	if (LOG.get_status() == Logger::Status::ERROR) {
-		if (LOCAL_res)
+		if (Local_reset_fatal_timer_started && Local_reset_fatal_timer.check(FATAL_REBOOT_DELAY * 1000)) {
+			LOG_INFO("Reboot time is up: Rebooting now!");
+			ESP.restart();
+		}
+	}
+
+	if (update_when_elapsed) {
+		if (update_timer.check(UPDATE_DELAY * 1000)) {
+			update_when_elapsed = false;
+			int delays[2];
+			bool valid = APPLICATION_LOGIC.get_measurements(delays);
+			if (valid) {
+				DEBUG_LOGLN("Values read successfully. Replace with push function to azure ####");
+			} else {
+				LOG_INFO("Delay measurement failed");
+			}
+		}
+	}
+
+	bool logic_changed = APPLICATION_LOGIC.run_logic(
+		&time_now,
+		&DEV_PUMP,
+		DEV_WLEVEL.get_value(),
+		DEV_WDETECT.get_value(),
+		DEV_SWITCH.get_value()
+	);
+
+	if (logic_changed) {
+		LogicStatus status = APPLICATION_LOGIC.get_status();
+
+		// if new status is idle, then we were pumping -> push the delays (assuming valid)
+		if (status == LogicStatus::IDLE) {
+			update_when_elapsed = true;
+			update_timer.reset();
+		} else if (status == LogicStatus::PUMP_STARTED || status == LogicStatus::DRAINING) {
+			handle_push_devices(true);
+		}
+	} else {
+		handle_push_devices(false);
 	}
 }

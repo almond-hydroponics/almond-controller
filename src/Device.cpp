@@ -1,7 +1,5 @@
 //Includes---------------------------------------------------------------------
-#include "AlmondPrecompiled.h"
 #include "Device.h"
-#include "Logger.h"
 
 
 //Implementation---------------------------------------------------------------

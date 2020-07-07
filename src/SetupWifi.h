@@ -3,9 +3,6 @@
 
 //Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
-#include <ESP8266WiFi.h>
-#include <ESP8266httpUpdate.h>
-#include <ESP8266WiFiMulti.h>
 #include "AsyncWait.h"
 
 

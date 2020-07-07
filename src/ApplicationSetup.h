@@ -1,6 +1,10 @@
 #pragma once
 
 //Includes---------------------------------------------------------------------
+#include "AlmondPrecompiled.h"
+#include "ApplicationConstants.h"
+#include "Logger.h"
+
 
 //Types------------------------------------------------------------------------
 class ApplicationSetup

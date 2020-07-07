@@ -6,6 +6,7 @@
 #include "TimerOverride.h"
 #include "ApplicationConstants.h"
 #include "RTClib.h"
+#include "Logger.h"
 
 
 //Types------------------------------------------------------------------------

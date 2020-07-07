@@ -1,7 +1,8 @@
 #pragma once
 
 //Includes---------------------------------------------------------------------
-#include <cstdint>
+#include "AlmondPrecompiled.h"
+#include "Logger.h"
 
 
 //Types------------------------------------------------------------------------

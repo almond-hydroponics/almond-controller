@@ -1,5 +1,4 @@
 //Includes---------------------------------------------------------------------
-#include "AlmondPrecompiled.h"
 #include "SetupWifi.h"
 #include "Logger.h"
 #include "Globals.h"
@@ -9,11 +8,11 @@
 //Declarations-----------------------------------------------------------------
 ESP8266WiFiMulti wifiMulti;
 
-const char *ntpServer1 = "pool.ntp.org";
-const char *ntpServer2 = "time.nist.gov";
-const char *ntpServer3 = "time.windows.com";
-const long gmtOffset_sec = 10800;
-const int daylightOffset_sec = 0;
+#define NTP_SERVER_HOST_1 "pool.ntp.org"
+#define NTP_SERVER_HOST_2 "time.nist.gov"
+#define NTP_SERVER_HOST_3 "time.windows.com"
+#define GMT_OFFSET_SEC 108000
+#define DAYLIGHT_OFFSET 0
 
 // Static IP configuration
 #define IPSET_STATIC { 10, 10, 10, 13 }
@@ -35,11 +34,11 @@ void SetupWifi::setClock()
 	// https://lastminuteengineers.com/esp32-ntp-server-date-time-tutorial/
 	// https://github.com/esp8266/Arduino/blob/master/cores/esp8266/time.cpp
 	configTime(
-		gmtOffset_sec,
-		daylightOffset_sec,
-		ntpServer1,
-		ntpServer2,
-		ntpServer3
+		GMT_OFFSET_SEC,
+		DAYLIGHT_OFFSET,
+		NTP_SERVER_HOST_1,
+		NTP_SERVER_HOST_2,
+		NTP_SERVER_HOST_3
 	);
 
 	setClock_status = STARTED;
@@ -47,6 +46,14 @@ void SetupWifi::setClock()
 	setClock_AsyncWait.startWaiting(millis(), 1000);	// Log every 1 second
 	// Asynchronously wait for network response via checkClockStatus().
 }
+
+//void printLocalTime()
+//{
+//	struct tm timeinfo{};
+//	if(!getLocalTime(&timeinfo)){
+//		return;
+//	}
+//}
 
 // Check Clock Status and update 'setClock_status' accordingly.
 void SetupWifi::checkClockStatus()
