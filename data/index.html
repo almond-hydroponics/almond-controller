@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Almond</title>
   <link href="/data/style.css" rel="stylesheet" type="text/css">
-  <script type="text/javascript" src="/data/supa.js"></script>
+  <script type="text/javascript" src="/data/almond.js"></script>
 
 </head>
 <body>
@@ -51,7 +51,6 @@
 
 </div>
 
-
 <script type="text/javascript">
 
   function get_target(elem) {
@@ -68,15 +67,14 @@
       get_target("status_status").innerHTML = jobj.status;
       get_target("status_uptime").innerHTML = time_to_str(jobj);
     });
-  };
-
+  }
 
   function update_time() {
     make_json_request("/get/time", function (jobj) {
 
       get_target("status_time").innerHTML = time_to_str(jobj);
     });
-  };
+  }
 
   function update_devices() {
     make_json_request("/get/dev", function (jobj) {
@@ -99,7 +97,7 @@
       }
       get_target("log").innerHTML = "<pre>" + text + "</pre>";
     });
-  };
+  }
 
   function update_all() {
     update_status();

@@ -1,5 +1,6 @@
 //Includes---------------------------------------------------------------------
 #include "NtpClient.h"
+//#include <WiFiUdp.h>
 
 
 //Declarations-----------------------------------------------------------------
@@ -48,11 +49,7 @@ uint32_t ntp_update()
 	WiFi.hostByName(NTP_SERVER_HOST, server_ip);
 
 	// send an NTP packet to a time server
-	sendNTPpacket(
-		udp,
-		server_ip,
-		buffer
-	);
+	sendNTPpacket(udp,server_ip, buffer);
 
 	LOG_INFO("Package sent, wait 1s");
 

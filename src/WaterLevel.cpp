@@ -20,8 +20,8 @@ WaterLevel::WaterLevel(
 
 void WaterLevel::setup()
 {
-	pinMode(PIN_TRIGGER, OUTPUT);
-	pinMode(PIN_ECHO, INPUT);
+	pinMode(this->pin_trigger, OUTPUT);
+	pinMode(this->pin_echo, INPUT);
 	digitalWrite(this->pin_trigger, LOW);
 }
 

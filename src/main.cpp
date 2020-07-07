@@ -209,14 +209,33 @@ static bool handle_set_email()
 	return ret;
 }
 
+static bool handle_push_devices(bool force)
+{
+	int values[6];
+	for (unsigned int loop = 0; loop < 6; loop++)
+		values[loop] = DEVICES[loop]->get_value();
+	DEBUG_LOG("Push to azure: ");
+	DEBUG_LOGLN(force);
+	LOG_INFO("Values: %s", values);
+	return force;
+}
+
 static bool handle_set_ntp()
 {
 	uint32_t ntp_time = ntp_update();
+	DEBUG_LOG("Starting NTP setting...");
 	if (ntp_time == 0) return false;
 
+	DEBUG_LOG("NTP setting is true ");
 	DeviceRtc::update_time(ntp_time);
 
 	return true;
+}
+
+static bool handle_set_push()
+{
+   LOG_INFO("Data push requested.");
+   return handle_push_devices(true);
 }
 
 static void handle_http(bool ret)
@@ -248,18 +267,9 @@ void handle_get_time()
 		time.minute,
 		time.second
 	);
+
 	WEBSERVER.send(200, "application/json", buffer);
 	free(buffer);
-}
-
-static bool handle_push_devices(bool force)
-{
-	int values[6];
-	for (unsigned int loop = 0; loop < 6; loop++)
-		values[loop] = DEVICES[loop]->get_value();
-	DEBUG_LOG("Push to azure: ");
-	DEBUG_LOGLN(force);
-	return force;
 }
 
 static bool handle_reboot()
@@ -288,7 +298,7 @@ void setup()
 	LOG.setup_serial(CONSTANTS.hostname, CONSTANTS.baudrate);
 #endif
 
-	LOG.setup_led(PIN_LED);
+	LOG.setup_led(WIFI_LED);
 	LOG.setup_fatal_hook(logger_fatal_hook);
 	ALMOND_CONFIGURATION.setup();
 	setupWifi.setupWifi();
@@ -300,7 +310,8 @@ void setup()
 
 	WEBSERVER.on("/get/dev", handle_get_devices);
 	WEBSERVER.on("/get/time", handle_get_time);
-	add_password_protected("ntp", []{ handle_http(handle_set_ntp()); });
+//	handle_set_ntp();
+//	add_password_protected("ntp", []{ handle_http(handle_set_ntp()); });
 	add_password_protected("reboot", []{ handle_http(handle_reboot()); });
 }
 
@@ -316,6 +327,8 @@ static void handle_serial()
 
 	if (strcmp(line, "email") == 0) {
 		handle_set_email();
+	} else if (strcmp(line, "push") == 0) {
+		handle_set_push();
 	} else {
 		serial_print("Invalid command\n");
 	}
@@ -353,15 +366,17 @@ void loop()
 	Config_run_table_time time_now{};
 	DEV_RTC.time_of_day(&time_now);
 
-	Serial.printf(
-		"Temp: %d, Humid: %d \n",
-		DEV_TEMP.get_value(),
-		DEV_HUMID.get_value()
-	);
-	Serial.printf("Distance: %d \n", DEV_WLEVEL.get_value());
-//	DEBUG_LOGLN(asctime(&time_now));
-//	Serial.printf("Temp: %d \n", DEV_TEMP.get_value());
-//	delay(5000);
+	LOG_INFO("Time from rtc: %d", DEV_RTC.get_value());
+
+//	LOG_INFO("%s : %s", &time_now.hour, &time_now.minute);
+
+//	Serial.printf(
+//		"Temp: %d, Humid: %d \n",
+//		DEV_TEMP.get_value(),
+//		DEV_HUMID.get_value()
+//	);
+//	Serial.printf("Distance: %d \n", DEV_WLEVEL.get_value());
+	delay(5000);
 
 	if (LOG.get_status() == Logger::Status::ERROR) {
 		if (Local_reset_fatal_timer_started && Local_reset_fatal_timer.check(FATAL_REBOOT_DELAY * 1000)) {

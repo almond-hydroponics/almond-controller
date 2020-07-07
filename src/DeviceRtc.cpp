@@ -10,7 +10,7 @@ DeviceRtc::DeviceRtc(const char *name)
 
 [[noreturn]] void DeviceRtc::setup()
 {
-	LOG_INFO("RTC boot!");
+	LOG_INFO("RTC has booted.");
 
 	if (!rtc.begin()) {
 		LOG_ERROR("Couldn't find RTC");
@@ -25,11 +25,13 @@ DeviceRtc::DeviceRtc(const char *name)
 		// This line sets the RTC with an explicit date & time, for example to set
 		// January 21, 2014 at 3am you would call:
 		// rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+	} else {
+		LOG_INFO("RTC is running!");
 	}
-	RTC_DS3231::adjust(DateTime(F(__DATE__), F(__TIME__)));
-	LOG_INFO("RTC is running!");
-	DateTime now(value);
-	LOG_INFO("Set time: %d:%d", now.hour(), now.minute());
+//	RTC_DS3231::adjust(DateTime(F(__DATE__), F(__TIME__)));
+//	LOG_INFO("RTC is running!");
+//	DateTime now(value);
+//	LOG_INFO("Set time: %d:%d", now.hour(), now.minute());
 }
 
 void DeviceRtc::time_of_day(Config_run_table_time *time)

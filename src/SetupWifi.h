@@ -33,10 +33,10 @@ public:
 
 	virtual ~SetupWifi() = default;
 
-//	WiFiClient &getWiFiClient()
-//	{
-//		return wifiClient;
-//	}
+	WiFiClient &getWiFiClient()
+	{
+		return wifiClient;
+	}
 
 	bool isReadyForProcessing()
 	{
@@ -46,7 +46,6 @@ public:
 	static String getMacAddress();
 	void setupWifi();
 	void loopWifi();
-	static void wifiLedOnConnect();
 
 private:
 	const char *ssid;

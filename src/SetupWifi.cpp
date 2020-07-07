@@ -3,6 +3,7 @@
 #include "Logger.h"
 #include "Globals.h"
 #include "ApplicationConstants.h"
+#include "DeviceRtc.h"
 
 
 //Declarations-----------------------------------------------------------------
@@ -45,15 +46,19 @@ void SetupWifi::setClock()
 	LOG_INFO("Waiting for NTP time sync: ");
 	setClock_AsyncWait.startWaiting(millis(), 1000);	// Log every 1 second
 	// Asynchronously wait for network response via checkClockStatus().
-}
 
-//void printLocalTime()
-//{
+//	time_t ntp_time = time(nullptr);
 //	struct tm timeinfo{};
-//	if(!getLocalTime(&timeinfo)){
-//		return;
-//	}
-//}
+//	gmtime_r(&ntp_time, &timeinfo);
+//
+//	DEBUG_LOGLN("Starting NTP setting...");
+////	if (ntp_time == 0) return;
+//
+//	DEBUG_LOGLN("NTP setting is true ");
+//	DEBUG_LOGLN(asctime(localtime(&ntp_time)));
+//	DEBUG_LOGLN(ntp_time);
+//	DeviceRtc::update_time(ntp_time);
+}
 
 // Check Clock Status and update 'setClock_status' accordingly.
 void SetupWifi::checkClockStatus()
@@ -62,17 +67,16 @@ void SetupWifi::checkClockStatus()
 	if (now < 3 * 3600 * 20) {
 		// The NTP request has not yet completed.
 		if (!setClock_AsyncWait.isWaiting(millis())) {
-			DEBUG_LOG(".");
+			DEBUG_LOG("*");
 			// Log every 1 second.
 			setClock_AsyncWait.startWaiting(millis(), 1000);
 		}
 		return;
 	}
 
-	Serial.printf("Time: %s", reinterpret_cast<const char *>(now));
-
 	// The NTP request has completed
 	setClock_status = SUCCESS;
+	DeviceRtc::update_time(now);
 
 #ifdef DEBUG
 	struct tm timeinfo{};
@@ -80,6 +84,9 @@ void SetupWifi::checkClockStatus()
 	DEBUG_LOGLN("");
 	DEBUG_LOG("Current time: ");
 	DEBUG_LOGLN(asctime(&timeinfo));
+
+	DEBUG_LOG("Epoch time: ");
+	DEBUG_LOGLN(now);
 #endif
 }
 
@@ -99,27 +106,25 @@ String SetupWifi::getMacAddress()
 	return macStr;
 }
 
-void SetupWifi::wifiLedOnConnect()
+void wifiLedOnConnect()
 {
-	digitalWrite(PIN_LED, HIGH);
-	delay(1000);
-	digitalWrite(PIN_LED, LOW);
-	delay(1000);
+	digitalWrite(WIFI_LED, HIGH);
+	delay(500);
+	digitalWrite(WIFI_LED, LOW);
+	delay(500);
 }
 
-// Connect to WiFi Network.
 void SetupWifi::setupWifi()
 {
 	if (WiFi.status() != WL_CONNECTED) {
 		DEBUG_LOGLN("");
 		DEBUG_LOG("MAC ");
 		DEBUG_LOGLN(getMacAddress());
-		DEBUG_LOG("Connecting to WiFi...");
-		DEBUG_LOGLN(ssid);
 
 		WiFi.mode(WIFI_STA);
 		wifiMulti.addAP(ssid, password);
 		wifiMulti.addAP("Valar Morghulis", "valardohaeris14#");
+		LOG_INFO("Wifi try: %s", ssid );
 
 		int attempt = 0;
 		while (wifiMulti.run() != WL_CONNECTED) {
@@ -130,32 +135,22 @@ void SetupWifi::setupWifi()
 			attempt++;
 
 			if (attempt == 50) {
-				DEBUG_LOGLN("");
-				DEBUG_LOGLN("Could not connect to WiFi");
-
+				LOG_FATAL("Could not connect to WiFi: Rebooting");
+				delay(100);
 				ESP.restart();
 				delay(500);
 			}
 		}
 
-		DEBUG_LOGLN("");
-		DEBUG_LOGLN("WiFi connected");
-		DEBUG_LOG("IP address: ");
-		DEBUG_LOG(WiFi.localIP().toString().c_str());
-		//DEBUG_LOG(", MAC ");
-		//DEBUG_LOG(getMacAddress());
-		DEBUG_LOGLN("");
+		LOG_INFO("Connected to %s - IP: %s", ssid, WiFi.localIP().toString().c_str() );
 		randomSeed(micros());
 		setClock();
 
-		DEBUG_LOGLN("Ready.");
-		digitalWrite(PIN_LED, LOW);
-		//DEBUG_LOG("IP address: ");
-		//DEBUG_LOGLN(WiFi.localIP());
+		LOG_INFO("WiFi is ready.");
+		digitalWrite(WIFI_LED, HIGH);
 	}
 }
 
-// Loop WiFi
 void SetupWifi::loopWifi()
 {
 	// Prevent ALL other actions here until the clock as been set by NTP.

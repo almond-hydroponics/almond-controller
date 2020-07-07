@@ -23,7 +23,7 @@ const Constants CONSTANTS = {
 		.period_off = {.hour = 0, .minute = 15, .second = 0},
 	},
 	.pump = {
-		.low_level_height_mm = 900,
+		.low_level_height_mm = 600,
 		.threshold_water_up_s = 10,
 	},
 	.mqtt = {
@@ -37,4 +37,3 @@ const Constants CONSTANTS = {
 	.timezone_h = 3,
 	.baudrate = 115200
 };
-

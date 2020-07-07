@@ -11,12 +11,7 @@ AlmondConfiguration ALMOND_CONFIGURATION;
 void AlmondConfiguration::setup()
 {
 	this->setup_i2c();
-	this->setup_wifi();
-}
-
-void AlmondConfiguration::loop()
-{
-	this->loop_wifi();
+	this->setup_fs();
 }
 
 unsigned int AlmondConfiguration::get_free_heap()
@@ -27,4 +22,15 @@ unsigned int AlmondConfiguration::get_free_heap()
 void AlmondConfiguration::setup_i2c()
 {
 	Wire.begin(PIN_SDA, PIN_SCL);
+}
+
+void AlmondConfiguration::setup_fs()
+{
+	bool mounted = SPIFFS.begin();
+	if (mounted) {
+		LOG_INFO("FS ok.");
+	}
+	else {
+		LOG_FATAL("FS mount failed!");
+	}
 }

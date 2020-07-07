@@ -16,5 +16,4 @@
 #include <ESP8266httpUpdate.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
 #include "base64.h"
