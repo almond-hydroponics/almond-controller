@@ -60,6 +60,12 @@ struct Config_mqtt
 	const char *mqtt_password;
 };
 
+struct Config_firebase
+{
+	const char *firebase_host;
+	const char *firebase_token;
+};
+
 struct Constants
 {
 	Config_email email;
@@ -67,6 +73,8 @@ struct Constants
 	Config_run_table runtable;
 	Config_pump pump;
 	Config_mqtt mqtt;
+	Config_firebase firebase;
+	const char *azure_connection;
 	const char *hostname;
 	const char *password;
 	uint8_t timezone_h;
@@ -85,4 +93,33 @@ extern const Constants CONSTANTS;
 #define PIN_ECHO    5	// board pin 1
 #define PIN_WDETECT 13	// board pin 7
 #define WIFI_LED    3	// board pin 3
+
+// Interval time(ms) for sending message to IoT Hub
+#define INTERVAL 2000
+
+// EEPROM address configuration
+#define EEPROM_SIZE 512
+
+// SSID and SSID password's length should < 32 bytes
+// http://serverfault.com/a/45509
+#define SSID_LEN 32
+#define PASS_LEN 32
+#define CONNECTION_STRING_LEN 256
+
+#define MESSAGE_MAX_LEN 256
+
+/**
+ * IoT Hub Device Connection String setup
+ * Find your Device Connection String by going to your Azure portal, creating (or navigating to) an IoT Hub,
+ * navigating to IoT Devices tab on the left, and creating (or selecting an existing) IoT Device.
+ * Then click on the named Device ID, and you will have able to copy the Primary or Secondary Device Connection String to this sample.
+ */
+#define AZURE_DEVICE_CONNECTION_STRING	CONSTANTS.azure_connection
+
+// The protocol you wish to use should be uncommented
+#define ALMOND_MQTT
+//#define ALMOND_HTTP
+
+// Interval time(ms) for sending message to IoT Hub
+#define AZURE_INTERVAL 2000
 

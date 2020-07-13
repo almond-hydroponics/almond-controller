@@ -32,6 +32,11 @@ const Constants CONSTANTS = {
 		.mqtt_user = "",
 		.mqtt_password = ""
 	},
+	.firebase = {
+		.firebase_host = "almond-data.firebaseio.com",
+		.firebase_token = "hryGBdsP9la99hmfc57UbLztBCQDRe8FmgmvbJ3e"
+	},
+	.azure_connection = "HostName=almond-hub.azure-devices.net;DeviceId=almond;SharedAccessKey=4U1zFRpk9YD44aXLety+NzbvAQqosz7i6vZPSCVEpwI=",
 	.hostname = "almond",
 	.password = "",
 	.timezone_h = 3,

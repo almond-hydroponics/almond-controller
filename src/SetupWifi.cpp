@@ -81,12 +81,8 @@ void SetupWifi::checkClockStatus()
 #ifdef DEBUG
 	struct tm timeinfo{};
 	gmtime_r(&now, &timeinfo);
-	DEBUG_LOGLN("");
-	DEBUG_LOG("Current time: ");
-	DEBUG_LOGLN(asctime(&timeinfo));
-
-	DEBUG_LOG("Epoch time: ");
-	DEBUG_LOGLN(now);
+	LOG_INFO("Current time: %s", asctime(&timeinfo));
+	LOG_INFO("Epoch time: %d", now);
 #endif
 }
 
@@ -123,7 +119,7 @@ void SetupWifi::setupWifi()
 
 		WiFi.mode(WIFI_STA);
 		wifiMulti.addAP(ssid, password);
-		wifiMulti.addAP("Valar Morghulis", "valardohaeris14#");
+//		wifiMulti.addAP("Valar Morghulis", "valardohaeris14#");
 		LOG_INFO("Wifi try: %s", ssid );
 
 		int attempt = 0;

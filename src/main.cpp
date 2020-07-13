@@ -3,7 +3,7 @@
 
 //Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
-#include <ESP8266WiFi.h>
+#include <FirebaseESP8266.h>
 #include "ApplicationConstants.h"
 #include "AlmondConfiguration.h"
 #include "ApplicationLogic.h"
@@ -13,7 +13,6 @@
 #include "SetupWifi.h"
 #include "Webserver.h"
 #include "SendEmail.h"
-#include "NtpClient.h"
 #include "Serial.h"
 #include "DevicePinInput.h"
 #include "DevicePinOutput.h"
@@ -29,6 +28,15 @@
 
 const char *ssid = STASSID;
 const char *password = STAPSK;
+
+#define FIREBASE_HOST CONSTANTS.firebase.firebase_host
+#define FIREBASE_AUTH CONSTANTS.firebase.firebase_token
+
+FirebaseData firebaseData;
+FirebaseJson json;
+
+String environmentDataPath = "/environment";
+String waterDataPath = "/water";
 
 
 //Declarations-----------------------------------------------------------------
@@ -169,9 +177,7 @@ static int generate_device_json(char *buffer)
 static void handle_get_devices()
 {
 	char *buffer = webserver_get_buffer();
-
 	if (buffer == nullptr) return;
-
 	int blen = generate_device_json(buffer);
 
 	if (blen == 0) {
@@ -182,6 +188,7 @@ static void handle_get_devices()
 	free(buffer);
 }
 
+#ifndef NDEBUG
 static bool handle_set_email()
 {
 	LOG_INFO("Status email requested.");
@@ -208,6 +215,7 @@ static bool handle_set_email()
 
 	return ret;
 }
+#endif
 
 static bool handle_push_devices(bool force)
 {
@@ -218,18 +226,6 @@ static bool handle_push_devices(bool force)
 	DEBUG_LOGLN(force);
 	LOG_INFO("Values: %s", values);
 	return force;
-}
-
-static bool handle_set_ntp()
-{
-	uint32_t ntp_time = ntp_update();
-	DEBUG_LOG("Starting NTP setting...");
-	if (ntp_time == 0) return false;
-
-	DEBUG_LOG("NTP setting is true ");
-	DeviceRtc::update_time(ntp_time);
-
-	return true;
 }
 
 static bool handle_set_push()
@@ -304,13 +300,21 @@ void setup()
 	setupWifi.setupWifi();
 	webserver_setup();
 
+//	handle_set_ntp();
+
 	for (auto loop : DEVICES) loop->setup();
 
 	Logger::set_status(Logger::Status::RUNNING);
 
+	Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+	Firebase.reconnectWiFi(true);
+	firebaseData.setBSSLBufferSize(1024, 1024);
+	firebaseData.setResponseSize(1024);
+	Firebase.setReadTimeout(firebaseData, 1000 * 60);
+	Firebase.setwriteSizeLimit(firebaseData, "tiny");
+
 	WEBSERVER.on("/get/dev", handle_get_devices);
 	WEBSERVER.on("/get/time", handle_get_time);
-//	handle_set_ntp();
 //	add_password_protected("ntp", []{ handle_http(handle_set_ntp()); });
 	add_password_protected("reboot", []{ handle_http(handle_reboot()); });
 }
@@ -354,10 +358,10 @@ void loop()
 	}
 
 	setupWifi.loopWifi();
-	webserver_loop();
-
 	// if wifi is not ready, don't do any other processing
 	if (!setupWifi.isReadyForProcessing()) return;
+
+	webserver_loop();
 
 	delay(10);
 
@@ -367,6 +371,19 @@ void loop()
 	DEV_RTC.time_of_day(&time_now);
 
 	LOG_INFO("Time from rtc: %d", DEV_RTC.get_value());
+	LOG_INFO("Time is to be used: %s", &time_now);
+
+	int humid = DEV_HUMID.get_value();
+	int temp = DEV_TEMP.get_value();
+	int waterLevel = DEV_WLEVEL.get_value();
+
+	Firebase.setFloat(firebaseData, environmentDataPath + "/currentTemperature", temp);
+	Firebase.setFloat(firebaseData, environmentDataPath + "/currentHumidity", humid);
+	Firebase.setInt(firebaseData, waterDataPath + "/waterLevel", waterLevel);
+
+	// Push values to an array
+	Firebase.push(firebaseData, environmentDataPath + "/temperature", temp);
+	Firebase.push(firebaseData, environmentDataPath + "/humidity", humid);
 
 //	LOG_INFO("%s : %s", &time_now.hour, &time_now.minute);
 
