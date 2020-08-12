@@ -7,3 +7,6 @@
 [submodule "lib/RTClib"]
 	path = lib/RTClib
 	url = https://github.com/adafruit/RTClib.git
+[submodule "sht-sensor-lib"]
+	path = sht-sensor-lib
+	url = https://github.com/almond-hydroponics/sht-sensor-lib
