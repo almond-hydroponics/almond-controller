@@ -127,7 +127,8 @@ LogicStatus ApplicationLogic::calculate_status(int pump_value, int water_switch)
 {
 
 	// If we are on uncertain state, keep old status.
-	if (water_switch != 0 && water_switch != 1) return status;
+	if (water_switch != 0 && water_switch != 1)
+		return status;
 
 	const LogicStatus states[] = {
 		LogicStatus::IDLE,
@@ -148,7 +149,8 @@ bool ApplicationLogic::run_logic(
 {
 	loop_measurement(water_switch);
 
-	if (!poll_timer.check(poll_interval)) return false;
+	if (!poll_timer.check(poll_interval))
+		return false;
 
 	poll_timer.reset();
 
@@ -167,13 +169,16 @@ bool ApplicationLogic::run_logic(
 
 	LogicStatus new_status = calculate_status(pump_value, water_switch);
 
-	if (new_status == status) return false;
+	if (new_status == status)
+		return false;
 
 	int new_status_int = to_integral(new_status);
 	LOG_INFO("PLogic new status:  %d", new_status_int);
 
 	status = new_status;
-	if (output->get_value() != pump_value) pump_timer.reset();
+	if (output->get_value() != pump_value){
+		pump_timer.reset();
+	}
 
 	output->set_value(pump_value, true);
 	return true;

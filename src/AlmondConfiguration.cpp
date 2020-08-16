@@ -10,8 +10,8 @@ AlmondConfiguration ALMOND_CONFIGURATION;
 //Implementation---------------------------------------------------------------
 void AlmondConfiguration::setup()
 {
-	this->setup_i2c();
-	this->setup_fs();
+	AlmondConfiguration::setup_i2c();
+	AlmondConfiguration::setup_fs();
 }
 
 unsigned int AlmondConfiguration::get_free_heap()

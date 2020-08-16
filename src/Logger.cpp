@@ -39,7 +39,12 @@ void Logger::setup_led(int _led_pin)
 
 Logger::Status Logger::get_status()
 {
-	this->status = status;
+	return this->status;
+}
+
+void Logger::set_status(Logger::Status status_)
+{
+	this->status = status_;
 }
 
 void get_uptime(InfoUptime *uptime)
@@ -141,8 +146,4 @@ const char *Logger::get_log_line(int line_number)
 		return nullptr;
 	return buf;
 
-}
-
-void Logger::set_status(Logger::Status status)
-{
 }

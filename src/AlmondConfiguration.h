@@ -10,14 +10,14 @@
 class AlmondConfiguration
 {
 public:
-	void setup();
+	static void setup();
 	void loop();
 
-	unsigned int get_free_heap();
+	static unsigned int get_free_heap();
 
 protected:
 	static void setup_i2c();
-	void setup_fs();
+	static void setup_fs();
 };
 
 extern AlmondConfiguration ALMOND_CONFIGURATION;

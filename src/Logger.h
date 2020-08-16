@@ -31,7 +31,7 @@ public:
 	void setup_fatal_hook(LoggerFatalHook hook);
 
 	Logger::Status get_status();
-	static void set_status(Logger::Status status);
+	void set_status(Logger::Status status);
 
 	void log(Logger::Level level, const __FlashStringHelper *format, ...);
 

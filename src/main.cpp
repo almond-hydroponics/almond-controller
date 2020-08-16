@@ -3,10 +3,10 @@
 
 //Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
-#include <FirebaseESP8266.h>
 #include "ApplicationConstants.h"
 #include "AlmondConfiguration.h"
 #include "ApplicationLogic.h"
+#include "MqttServer.h"
 #include "DeviceRtc.h"
 #include "WaterLevel.h"
 #include "EnvironmentSht.h"
@@ -28,12 +28,11 @@
 
 const char *ssid = STASSID;
 const char *password = STAPSK;
-
-#define FIREBASE_HOST CONSTANTS.firebase.firebase_host
-#define FIREBASE_AUTH CONSTANTS.firebase.firebase_token
-
-FirebaseData firebaseData;
-FirebaseJson json;
+const char *mqttServer = CONSTANTS.mqtt.mqtt_server;
+const char *mqttUsername = CONSTANTS.mqtt.mqtt_user;
+const char *mqttPassword = CONSTANTS.mqtt.mqtt_password;
+const char *mqttClientName = "MASHA";
+const short mqttPort = CONSTANTS.mqtt.mqtt_port;
 
 String environmentDataPath = "/environment";
 String waterDataPath = "/water";
@@ -49,12 +48,27 @@ DevicePinInput		DEV_SWITCH("switch", PIN_SWITCH, 8, true);
 DevicePinInput		DEV_WDETECT("water_detect", PIN_WDETECT, 4, true);
 ApplicationLogic	APPLICATION_LOGIC;
 
+// Wifi declaration
 SetupWifi setupWifi(
 	ssid,
 	password,
 	CA_CERT_PROG,
 	CLIENT_CERT_PROG,
 	CLIENT_KEY_PROG
+);
+
+// Mqtt client declaration
+MqttServer client(
+	ssid,
+	password,
+	CA_CERT_PROG,
+	CLIENT_CERT_PROG,
+	CLIENT_KEY_PROG,
+	mqttServer,
+	mqttUsername,
+	mqttPassword,
+	mqttClientName,
+	mqttPort
 );
 
 static const int UPDATE_DELAY = 20;
@@ -222,9 +236,16 @@ static bool handle_push_devices(bool force)
 	int values[6];
 	for (unsigned int loop = 0; loop < 6; loop++)
 		values[loop] = DEVICES[loop]->get_value();
-	DEBUG_LOG("Push to azure: ");
-	DEBUG_LOGLN(force);
-	LOG_INFO("Values: %s", values);
+	DEBUG_LOGLN("Push data through MQTT: ");
+
+	int humid = DEV_HUMID.get_value();
+	int temp = DEV_TEMP.get_value();
+	int waterLevel = DEV_WLEVEL.get_value();
+
+	LOG_INFO("Time from rtc: %d", DEV_RTC.get_value());
+	LOG_INFO("Temp: %d, Humid: %d \n", temp, humid);
+	LOG_INFO("Distance: %d \n", waterLevel);
+//	LOG_INFO("Values of devices: %s", values);
 	return force;
 }
 
@@ -287,6 +308,22 @@ void add_password_protected(const char *url, void (*handler)())
 	free(buffer);
 }
 
+void onConnectionEstablished()
+{
+	// Subscribe to "almond/Pump" and display received message on serial
+	client.subscribe("almond/Pump", [](const String & payload) {
+		Serial.println(payload);
+	});
+
+	// Publish a message to "almond/Pump
+	client.publish("almond/Test", "This is a test");
+
+	// Execute delayed instructions
+	client.executeDelayed(5 * 1000, []() {
+		client.publish("almond/Test", "This is a message sent after 5 seconds later");
+	});
+}
+
 void setup()
 {
 	// SETUP ESP8266 DEVICE
@@ -296,22 +333,20 @@ void setup()
 
 	LOG.setup_led(WIFI_LED);
 	LOG.setup_fatal_hook(logger_fatal_hook);
-	ALMOND_CONFIGURATION.setup();
+	AlmondConfiguration::setup();
 	setupWifi.setupWifi();
 	webserver_setup();
+
+	// setup mqtt
+//	client.enableDebuggingMessages();
+//	client.enableHTTPWebUpdater();
+//	client.enableLastWillMessage("almond/lastWill", "Going offline...");
 
 //	handle_set_ntp();
 
 	for (auto loop : DEVICES) loop->setup();
 
-	Logger::set_status(Logger::Status::RUNNING);
-
-	Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
-	Firebase.reconnectWiFi(true);
-	firebaseData.setBSSLBufferSize(1024, 1024);
-	firebaseData.setResponseSize(1024);
-	Firebase.setReadTimeout(firebaseData, 1000 * 60);
-	Firebase.setwriteSizeLimit(firebaseData, "tiny");
+	LOG.set_status(Logger::Status::RUNNING);
 
 	WEBSERVER.on("/get/dev", handle_get_devices);
 	WEBSERVER.on("/get/time", handle_get_time);
@@ -350,7 +385,7 @@ void loop()
 	static TimerOverride update_timer;
 	static bool update_when_elapsed = false;
 	static unsigned long avail_memory_last = 0xFFFF;
-	unsigned long avail_memory_now = ALMOND_CONFIGURATION.get_free_heap();
+	unsigned long avail_memory_now = AlmondConfiguration::get_free_heap();
 
 	if (avail_memory_now < avail_memory_last) {
 		LOG_INFO("Memory: %u", avail_memory_now);
@@ -358,6 +393,7 @@ void loop()
 	}
 
 	setupWifi.loopWifi();
+//	client.loop();
 	// if wifi is not ready, don't do any other processing
 	if (!setupWifi.isReadyForProcessing()) return;
 
@@ -369,31 +405,6 @@ void loop()
 
 	Config_run_table_time time_now{};
 	DEV_RTC.time_of_day(&time_now);
-
-	LOG_INFO("Time from rtc: %d", DEV_RTC.get_value());
-	LOG_INFO("Time is to be used: %s", &time_now);
-
-	int humid = DEV_HUMID.get_value();
-	int temp = DEV_TEMP.get_value();
-	int waterLevel = DEV_WLEVEL.get_value();
-
-	Firebase.setFloat(firebaseData, environmentDataPath + "/currentTemperature", temp);
-	Firebase.setFloat(firebaseData, environmentDataPath + "/currentHumidity", humid);
-	Firebase.setInt(firebaseData, waterDataPath + "/waterLevel", waterLevel);
-
-	// Push values to an array
-	Firebase.push(firebaseData, environmentDataPath + "/temperature", temp);
-	Firebase.push(firebaseData, environmentDataPath + "/humidity", humid);
-
-//	LOG_INFO("%s : %s", &time_now.hour, &time_now.minute);
-
-//	Serial.printf(
-//		"Temp: %d, Humid: %d \n",
-//		DEV_TEMP.get_value(),
-//		DEV_HUMID.get_value()
-//	);
-//	Serial.printf("Distance: %d \n", DEV_WLEVEL.get_value());
-	delay(5000);
 
 	if (LOG.get_status() == Logger::Status::ERROR) {
 		if (Local_reset_fatal_timer_started && Local_reset_fatal_timer.check(FATAL_REBOOT_DELAY * 1000)) {
@@ -408,9 +419,9 @@ void loop()
 			int delays[2];
 			bool valid = APPLICATION_LOGIC.get_measurements(delays);
 			if (valid) {
-				DEBUG_LOGLN("Values read successfully. Replace with push function to azure ####");
+				LOG_INFO("Values read successfully. Replace with push function to azure ####");
 			} else {
-				LOG_INFO("Delay measurement failed");
+				LOG_WARN("Delay measurement failed");
 			}
 		}
 	}
@@ -436,4 +447,6 @@ void loop()
 	} else {
 		handle_push_devices(false);
 	}
+
+	delay(10000);
 }

@@ -71,4 +71,7 @@ private:
 
 	void setClock();
 	void checkClockStatus();
+
+protected:
+		bool enableSerialLogs{};
 };

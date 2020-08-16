@@ -105,8 +105,10 @@ String SetupWifi::getMacAddress()
 void wifiLedOnConnect()
 {
 	digitalWrite(WIFI_LED, HIGH);
+	LOG_INFO("I'm blinking HIGH");
 	delay(500);
 	digitalWrite(WIFI_LED, LOW);
+	LOG_INFO("I'm blinking LOW");
 	delay(500);
 }
 
@@ -139,6 +141,9 @@ void SetupWifi::setupWifi()
 		}
 
 		LOG_INFO("Connected to %s - IP: %s", ssid, WiFi.localIP().toString().c_str() );
+//		if (enableSerialLogs) {
+//			LOG_INFO("Connected to %s - IP: %s", ssid, WiFi.localIP().toString().c_str() );
+//		}
 		randomSeed(micros());
 		setClock();
 
@@ -154,5 +159,6 @@ void SetupWifi::loopWifi()
 		checkClockStatus();
 		return;
 	}
+	LOG_INFO("WIFI Connected");
 //	MilliSec currentMilliSec = millis();
 }
