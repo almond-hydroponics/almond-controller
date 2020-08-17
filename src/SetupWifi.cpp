@@ -102,13 +102,16 @@ String SetupWifi::getMacAddress()
 	return macStr;
 }
 
+bool SetupWifi::connected() const
+{
+	return wifi_ok;
+}
+
 void wifiLedOnConnect()
 {
 	digitalWrite(WIFI_LED, HIGH);
-	LOG_INFO("I'm blinking HIGH");
 	delay(500);
 	digitalWrite(WIFI_LED, LOW);
-	LOG_INFO("I'm blinking LOW");
 	delay(500);
 }
 
@@ -118,6 +121,7 @@ void SetupWifi::setupWifi()
 		DEBUG_LOGLN("");
 		DEBUG_LOG("MAC ");
 		DEBUG_LOGLN(getMacAddress());
+		this->wifi_ok = false;
 
 		WiFi.mode(WIFI_STA);
 		wifiMulti.addAP(ssid, password);
@@ -132,7 +136,7 @@ void SetupWifi::setupWifi()
 			delay(500);
 			attempt++;
 
-			if (attempt == 50) {
+			if (attempt == 100) {
 				LOG_FATAL("Could not connect to WiFi: Rebooting");
 				delay(100);
 				ESP.restart();
@@ -148,6 +152,7 @@ void SetupWifi::setupWifi()
 		setClock();
 
 		LOG_INFO("WiFi is ready.");
+		this->wifi_ok = true;
 		digitalWrite(WIFI_LED, HIGH);
 	}
 }
@@ -159,6 +164,5 @@ void SetupWifi::loopWifi()
 		checkClockStatus();
 		return;
 	}
-	LOG_INFO("WIFI Connected");
 //	MilliSec currentMilliSec = millis();
 }

@@ -6,7 +6,7 @@
 // Note: G++ seems to require that these are in the proper order (same as declared).
 const Constants CONSTANTS = {
 	.email = {
-		.server_host = "",
+		.server_host = "smtp.gmail.com",
 		.server_port = 465,
 		.login = "",
 		.password = "",
@@ -20,7 +20,7 @@ const Constants CONSTANTS = {
 		.active_start = {.hour = 7, .minute = 0, .second = 0},
 		.active_stop = {.hour = 20, .minute = 15, .second = 0},
 		.period_on = {.hour = 0, .minute = 1, .second = 0},
-		.period_off = {.hour = 0, .minute = 15, .second = 0},
+		.period_off = {.hour = 0, .minute = 14, .second = 0},
 	},
 	.pump = {
 		.low_level_height_mm = 600,

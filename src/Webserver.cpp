@@ -23,7 +23,8 @@ static void handle_log()
 {
 	char *buffer = webserver_get_buffer();
 
-	if (buffer == nullptr) return;
+	if (buffer == nullptr)
+		return;
 
 	int len = 0;
 	int total_len = 0;
@@ -38,13 +39,13 @@ static void handle_log()
 	for (int loop = 0; loop < Logger::max_lines; loop++) {
 		const char *log_line = LOG.get_log_line(loop);
 
-		if (log_line == nullptr) break;
+		if (log_line == nullptr)
+			break;
 
 		if (loop > 0) {
 			strncat(buffer + total_len, ",\"", 2);
 			total_len += 2;
-		}
-		else {
+		} else {
 			strncat(buffer + total_len, "\"", 1);
 			total_len += 1;
 		}
@@ -83,7 +84,7 @@ static void handle_status()
 	snprintf(
 		buffer,
 		WEBSERVER_MAX_RESPONSE_SIZE,
-		R"({ "status":"%s","hour":%u,"min":%u,"sec":%u})",
+		R"({"status":"%s","hour":%u,"min":%u,"sec":%u})",
 		status,
 		uptime.hours,
 		uptime.minutes,

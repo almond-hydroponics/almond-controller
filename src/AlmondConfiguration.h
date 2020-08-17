@@ -6,6 +6,7 @@
 #include "Logger.h"
 #include "TimerOverride.h"
 
+
 //Types------------------------------------------------------------------------
 class AlmondConfiguration
 {
@@ -18,6 +19,7 @@ public:
 protected:
 	static void setup_i2c();
 	static void setup_fs();
+	static void setup_led_outputs();
 };
 
 extern AlmondConfiguration ALMOND_CONFIGURATION;

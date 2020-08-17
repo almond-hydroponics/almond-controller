@@ -12,6 +12,7 @@ void AlmondConfiguration::setup()
 {
 	AlmondConfiguration::setup_i2c();
 	AlmondConfiguration::setup_fs();
+	AlmondConfiguration::setup_led_outputs();
 }
 
 unsigned int AlmondConfiguration::get_free_heap()
@@ -33,4 +34,11 @@ void AlmondConfiguration::setup_fs()
 	else {
 		LOG_FATAL("FS mount failed!");
 	}
+}
+
+void AlmondConfiguration::setup_led_outputs()
+{
+	LOG.setup_led(WIFI_LED);
+	LOG.setup_led(PIN_LED);
+	LOG_INFO("Output LEDs ok.");
 }

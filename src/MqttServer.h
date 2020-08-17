@@ -4,13 +4,13 @@
 //Includes---------------------------------------------------------------------
 #include <PubSubClient.h>
 #include "SetupWifi.h"
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
-#include <ESP8266HTTPUpdateServer.h>
+//#include <ESP8266WebServer.h>
+//#include <ESP8266mDNS.h>
+//#include <ESP8266HTTPUpdateServer.h>
 
-#define WebServer ESP8266WebServer
-#define ESPmDNS ESP8266mDNS
-#define ESPHTTPUpdateServer ESP8266HTTPUpdateServer
+//#define WebServer ESP8266WebServer
+//#define ESPmDNS ESP8266mDNS
+//#define ESPHTTPUpdateServer ESP8266HTTPUpdateServer
 
 #define MAX_TOPIC_SUBSCRIPTION_LIST_SIZE 10
 #define MAX_DELAYED_EXECUTION_LIST_SIZE 10
@@ -25,28 +25,31 @@ typedef std::function<void(const String &topicStr, const String &message)>
 typedef std::function<void()> DelayedExecutionCallback;
 
 //Types------------------------------------------------------------------------
-class MqttServer: public SetupWifi
+class MqttServer
 {
 public:
+	// MQTT without MQTT authentication
+	MqttServer(
+		const char *mqttServerIp,
+		const char *mqttClientName,
+		short mqttServerPort,
+		const WiFiClient& wifiClient);
+
 	// MQTT with MQTT authentication
 	MqttServer(
-		const char *ssid,
-		const char *password,
-		const char *caCertProg,
-		const char *clientCertProg,
-		const char *clientKeyProg,
 		const char *mqttServerIp,
 		const char *mqttUsername,
 		const char *mqttPassword,
 		const char *mqttClientName,
-		short mqttServerPort);
+		short mqttServerPort,
+		const WiFiClient& wifiClient);
 
-	~MqttServer() override;
+	virtual ~MqttServer() = default;
 
 	// Optional functionality
-	void enableDebuggingMessages(const bool enabled = true); // Allow to display useful debugging messages. Can be set to false to disable them during program execution
-	void enableHTTPWebUpdater(const char *username, const char *password, const char *address = "/"); // Activate the web updater, must be set before the first loop() call.
-	void enableHTTPWebUpdater(const char *address = "/"); // Will set user and password equal to mqttUsername and mqttPassword
+//	void enableDebuggingMessages(const bool enabled = true); // Allow to display useful debugging messages. Can be set to false to disable them during program execution
+//	void enableHTTPWebUpdater(const char *username, const char *password, const char *address = "/"); // Activate the web updater, must be set before the first loop() call.
+//	void enableHTTPWebUpdater(const char *address = "/mqtt"); // Will set user and password equal to mqttUsername and mqttPassword
 	void enableMQTTPersistence(); // Tell the broker to establish a persistent connection. Disabled by default. Must be called before the first loop() execution
 	void enableLastWillMessage(const char *topic, const char *message, const bool retain = false); // Must be set before the first loop() call.
 
@@ -97,11 +100,11 @@ private:
 	byte topicSubscriptionListSize;
 
 	// HTTP update server related
-	char *updateServerAddress;
-	char *updateServerUsername{};
-	char *updateServerPassword{};
-	WebServer *httpServer;
-	ESPHTTPUpdateServer *httpUpdater;
+//	char *updateServerAddress;
+//	char *updateServerUsername{};
+//	char *updateServerPassword{};
+//	WebServer *httpServer;
+//	ESPHTTPUpdateServer *httpUpdater;
 
 	// Delayed execution related
 	struct DelayedExecutionRecord

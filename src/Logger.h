@@ -21,7 +21,7 @@ public:
 		DEBUG, INFO, WARNING, ERROR, FATAL
 	};
 
-	static const int max_lines = 16;
+	static const int max_lines = 50;
 	static const int max_line_len = 80;
 
 	Logger();

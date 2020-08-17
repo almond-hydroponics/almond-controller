@@ -27,7 +27,7 @@ void DevicePinOutput::set_value(int value, bool verbose)
 	digitalWrite(this->pin, write_value);
 
 	if (this->value != value && verbose) {
-		printf("Device '%s' status now: %d", this->name, value);
+		LOG_INFO("Device '%s' status now: %d", this->name, value);
 	}
 	this->value = value;
 }

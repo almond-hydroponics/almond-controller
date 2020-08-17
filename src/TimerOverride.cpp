@@ -1,5 +1,4 @@
 //Includes---------------------------------------------------------------------
-#include "AlmondPrecompiled.h"
 #include "TimerOverride.h"
 
 
@@ -39,16 +38,14 @@ bool TimerOverride::check(unsigned long timeout_ms) const
 	if (current_time < this->reset_ms) { // did the current time overflow
 		if (this->reset_ms < target_time) { // no, it did not -> we are way over.
 			return true;
-		}
-		else { // yes its overflown as well, normal functionality.
+		} else { // yes its overflown as well, normal functionality.
 			return (current_time >= target_time);
 		}
 	}
 	else { // timer has not overflown, how about the target?
 		if (this->reset_ms < target_time) { // no overflow, here either. Normal business
 			return (current_time >= target_time);
-		}
-		else { // the target is overflown, so must we.
+		} else { // the target is overflown, so must we.
 			return false;
 		}
 	}

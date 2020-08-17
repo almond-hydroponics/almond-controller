@@ -43,7 +43,7 @@ DeviceRtc			DEV_RTC("rtc");
 WaterLevel			DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO);
 EnvironmentSht		DEV_TEMP("temp");
 EnvironmentSht		DEV_HUMID("humid");
-DevicePinOutput		DEV_PUMP("pump", PIN_PUMP, false);
+DevicePinOutput		DEV_PUMP("pump", PIN_PUMP, false);	// Pump inverted - writing 0 will start the pump
 DevicePinInput		DEV_SWITCH("switch", PIN_SWITCH, 8, true);
 DevicePinInput		DEV_WDETECT("water_detect", PIN_WDETECT, 4, true);
 ApplicationLogic	APPLICATION_LOGIC;
@@ -59,16 +59,12 @@ SetupWifi setupWifi(
 
 // Mqtt client declaration
 MqttServer client(
-	ssid,
-	password,
-	CA_CERT_PROG,
-	CLIENT_CERT_PROG,
-	CLIENT_KEY_PROG,
 	mqttServer,
 	mqttUsername,
 	mqttPassword,
 	mqttClientName,
-	mqttPort
+	mqttPort,
+	setupWifi.getWiFiClient()
 );
 
 static const int UPDATE_DELAY = 20;
@@ -120,7 +116,7 @@ static void logger_fatal_hook(const char *log_line)
 	}
 
 	// if we are not connected, we are not storing the messages for now.
-	if (!setupWifi.isReadyForProcessing()) return;
+	if (setupWifi.connected() == false) return;
 
 	int buffer_len = Logger::max_line_len + 128;
 	int subject_len = 256;
@@ -221,6 +217,7 @@ static bool handle_set_email()
 	);
 
 	int blen = generate_device_json(buffer);
+	LOG_INFO("Device JSON: %d", blen);
 	serial_print_raw(buffer, blen, true);
 	bool ret = email_send(&CONSTANTS.email, CONSTANTS.email.receiver, subject, buffer);
 
@@ -236,16 +233,17 @@ static bool handle_push_devices(bool force)
 	int values[6];
 	for (unsigned int loop = 0; loop < 6; loop++)
 		values[loop] = DEVICES[loop]->get_value();
-	DEBUG_LOGLN("Push data through MQTT: ");
+//	LOG_INFO("Push data through MQTT: ");
 
-	int humid = DEV_HUMID.get_value();
-	int temp = DEV_TEMP.get_value();
-	int waterLevel = DEV_WLEVEL.get_value();
+//	int time = DEV_RTC.get_value();
+//	int humid = DEV_HUMID.get_value();
+//	int temp = DEV_TEMP.get_value();
+//	int waterLevel = DEV_WLEVEL.get_value();
+//
+//	LOG_INFO("Time from rtc: %d", time);
+//	LOG_INFO("Temp: %d, Humid: %d", temp, humid);
+//	LOG_INFO("Distance: %d \n", waterLevel);
 
-	LOG_INFO("Time from rtc: %d", DEV_RTC.get_value());
-	LOG_INFO("Temp: %d, Humid: %d \n", temp, humid);
-	LOG_INFO("Distance: %d \n", waterLevel);
-//	LOG_INFO("Values of devices: %s", values);
 	return force;
 }
 
@@ -313,6 +311,7 @@ void onConnectionEstablished()
 	// Subscribe to "almond/Pump" and display received message on serial
 	client.subscribe("almond/Pump", [](const String & payload) {
 		Serial.println(payload);
+		LOG_INFO("Subscribed to almond/Pump");
 	});
 
 	// Publish a message to "almond/Pump
@@ -321,6 +320,7 @@ void onConnectionEstablished()
 	// Execute delayed instructions
 	client.executeDelayed(5 * 1000, []() {
 		client.publish("almond/Test", "This is a message sent after 5 seconds later");
+		LOG_INFO("Published to almond/Test");
 	});
 }
 
@@ -331,7 +331,6 @@ void setup()
 	LOG.setup_serial(CONSTANTS.hostname, CONSTANTS.baudrate);
 #endif
 
-	LOG.setup_led(WIFI_LED);
 	LOG.setup_fatal_hook(logger_fatal_hook);
 	AlmondConfiguration::setup();
 	setupWifi.setupWifi();
@@ -339,8 +338,7 @@ void setup()
 
 	// setup mqtt
 //	client.enableDebuggingMessages();
-//	client.enableHTTPWebUpdater();
-//	client.enableLastWillMessage("almond/lastWill", "Going offline...");
+	client.enableLastWillMessage("almond/lastWill", "Going offline...");
 
 //	handle_set_ntp();
 
@@ -369,7 +367,7 @@ static void handle_serial()
 	} else if (strcmp(line, "push") == 0) {
 		handle_set_push();
 	} else {
-		serial_print("Invalid command\n");
+		LOG_WARN("Invalid command\n");
 	}
 }
 #endif
@@ -393,10 +391,10 @@ void loop()
 	}
 
 	setupWifi.loopWifi();
-//	client.loop();
 	// if wifi is not ready, don't do any other processing
-	if (!setupWifi.isReadyForProcessing()) return;
+	if (setupWifi.connected() == false) return;
 
+	client.loop();
 	webserver_loop();
 
 	delay(10);
@@ -448,5 +446,5 @@ void loop()
 		handle_push_devices(false);
 	}
 
-	delay(10000);
+//	delay(5000);
 }

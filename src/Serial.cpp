@@ -110,4 +110,3 @@ int serial_receive_number(int min_value, int max_value)
 		}
 	}
 }
-
