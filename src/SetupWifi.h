@@ -38,12 +38,10 @@ public:
 		return wifiClient;
 	}
 
-	bool connected() const;
-
-//	bool isReadyForProcessing()
-//	{
-//		return (setClock_status > FINISHED);
-//	}
+	bool isReadyForProcessing()
+	{
+		return (setClock_status > FINISHED);
+	}
 
 	static String getMacAddress();
 	void setupWifi();
@@ -61,8 +59,6 @@ private:
 	BearSSL::X509List x509ClientCert;
 	BearSSL::PrivateKey PrivateClientKey;
 
-	bool wifi_ok;
-
 	// Note: variables of type 'status' are NEVER assigned a value of 'FINISHED'.
 	// 'FINISHED' is only used if comparisons (e.g. if(x_status>FINISHED)... ),
 	// rather than always testing for SUCCESS || FAILED.
@@ -75,7 +71,4 @@ private:
 
 	void setClock();
 	void checkClockStatus();
-
-protected:
-		bool enableSerialLogs{};
 };

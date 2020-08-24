@@ -55,7 +55,7 @@ struct Config_pump
 struct Config_mqtt
 {
 	const char *mqtt_server;
-	const short mqtt_port;
+	short mqtt_port;
 	const char *mqtt_user;
 	const char *mqtt_password;
 };

@@ -6,16 +6,16 @@
 //Implementation---------------------------------------------------------------
 MqttServer::MqttServer(
 	const char *mqttServerIp,
+	const WiFiClient &wifiClient,
 	const char *mqttClientName,
-	short mqttServerPort,
-	const WiFiClient &wifiClient) :
+	short mqttServerPort) :
 	MqttServer(
 		mqttServerIp,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		(WiFiClient &)wifiClient,
 		mqttClientName,
-		mqttServerPort,
-		(Client &)wifiClient)
+		mqttServerPort)
 {
 }
 
@@ -23,32 +23,14 @@ MqttServer::MqttServer(
 	const char *mqttServerIp,
 	const char *mqttUsername,
 	const char *mqttPassword,
+	const WiFiClient& wifiClient,
 	const char *mqttClientName,
-	short mqttServerPort,
-	const WiFiClient &wifiClient) :
-	MqttServer(
-		mqttServerIp,
-		mqttUsername,
-		mqttPassword,
-		mqttClientName,
-		mqttServerPort,
-		(Client &)wifiClient)
-{
-}
-
-MqttServer::MqttServer(
-	const char *mqttServerIp,
-	const char *mqttUsername,
-	const char *mqttPassword,
-	const char *mqttClientName,
-	const short mqttServerPort,
-	const WiFiClient& wifiClient) :
+	short mqttServerPort) :
 	mqttServerIp(mqttServerIp),
 	mqttUsername(mqttUsername),
 	mqttPassword(mqttPassword),
 	mqttClientName(mqttClientName),
-	mqttServerPort(mqttServerPort),
-	mqttClient(mqttServerIp, mqttServerPort, (Client &)wifiClient)
+	mqttServerPort(mqttServerPort)
 {
 	// MQTT client
 	topicSubscriptionListSize = 0;
@@ -58,15 +40,15 @@ MqttServer::MqttServer(
 	mqttLastWillMessage = nullptr;
 	mqttLastWillRetain = false;
 	mqttCleanSession = true;
+	mqttClient.setServer(mqttServerIp, mqttServerPort);
+	mqttClient.setClient((WiFiClient &)wifiClient);
 	mqttClient.setCallback([this](char *topic, byte *payload, unsigned int length) {
 		this->mqttMessageReceivedCallback(topic, payload, length);
 	});
 
 	// other
 	connectionEstablishedCallback = onConnectionEstablished;
-	showLegacyConstructorWarning = false;
 	delayedExecutionListSize = 0;
-	connectionEstablishedCount = 0;
 }
 
 // Return true if everything is connected
@@ -79,32 +61,6 @@ MqttServer::MqttServer(
 //void MqttServer::enableDebuggingMessages(const bool enabled)
 //{
 //	enableSerialLogs = enabled;
-//}
-
-//void MqttServer::enableHTTPWebUpdater(
-//	const char *username,
-//	const char *password,
-//	const char *address)
-//{
-//	if (httpServer == nullptr) {
-//		httpServer = new WebServer(80);
-//		httpUpdater = new ESPHTTPUpdateServer(enableSerialLogs);
-//		updateServerUsername = (char *)username;
-//		updateServerPassword = (char *)password;
-//		updateServerAddress = (char *)address;
-//	}
-//	else if (enableSerialLogs)
-//		LOG_WARN("SYS! You can't call enableHTTPWebUpdater() more than once !\n");
-//}
-
-//void MqttServer::enableHTTPWebUpdater(const char *address)
-//{
-//	LOG_INFO("Setup MQTT from HTTP Web");
-//	if (mqttUsername == nullptr || mqttPassword == nullptr)
-//		enableHTTPWebUpdater("", "", address);
-//	else
-//		LOG_INFO("Updating MQTT from HTTP Web");
-//		enableHTTPWebUpdater(mqttUsername, mqttPassword, address);
 //}
 
 void MqttServer::enableMQTTPersistence()
@@ -126,50 +82,21 @@ void MqttServer::enableLastWillMessage(
 void MqttServer::loop()
 {
 	MilliSec currentMillis = millis();
-//	if (SetupWifi::connected() == true) {
-		// Config of web updater
-//		if (httpServer != nullptr) {
-//			MDNS.begin(mqttClientName);
-//			httpUpdater->setup(
-//				httpServer,
-//			updateServerAddress,
-//			updateServerUsername,
-//			updateServerPassword);
-//			httpServer->begin();
-//			MDNS.addService("http", "tcp", 80);
-//
-//			if (enableSerialLogs)
-//				LOG_INFO(
-//					"WEB: Updater ready, open http://%s.local in your browser and login with username '%s' and password '%s'.\n",
-//					mqttClientName,
-//					updateServerUsername,
-//					updateServerPassword);
-//		}
 
 	// MQTT handling
-	if (mqttClient.connected()) {
-		LOG_INFO("MQTT connected");
-		mqttClient.loop();
+	while (!mqttClient.connected()) {
+		LOG_INFO("Attempting MQTT connection");
+		delay(500);
+		if (currentMillis - lastMqttConnectionMillis > CONNECTION_RETRY_DELAY || lastMqttConnectionMillis == 0) {
+			connectToMqttBroker();
+		}
 	}
 
-	static AsyncWait waitToRetry;
-	if (waitToRetry.isWaiting(currentMillis)) return;
-
-//	LOG_INFO("Attempting MQTT connection");
-
-	if (mqttConnected) {
-		LOG_ERROR("MQTT! Lost connection.");
-		topicSubscriptionListSize = 0;
-		mqttConnected = false;
-	}
-
-	if (currentMillis - lastMqttConnectionMillis
-		> CONNECTION_RETRY_DELAY || lastMqttConnectionMillis == 0)
-		connectToMqttBroker();
+	mqttClient.loop();
 
 	// Delayed execution handling
 	if (delayedExecutionListSize > 0) {
-		unsigned long currentMillis = millis();
+		MilliSec currentMillis = millis();
 
 		for (byte i = 0; i < delayedExecutionListSize; i++) {
 			if (delayedExecutionList[i].targetMillis <= currentMillis) {
@@ -187,7 +114,7 @@ bool MqttServer::publish(const String &topic, const String &payload, bool retain
 {
 	bool success = mqttClient.publish(topic.c_str(), payload.c_str(), retain);
 	if (success)
-		LOG_INFO("MQTT << [%s] %s\n", topic.c_str(), payload.c_str());
+		LOG_INFO("MQTT >> [%s] %s", topic.c_str(), payload.c_str());
 	else
 		// This can occurs if the message is too long according to the maximum defined in PubsubClient.h
 		LOG_ERROR("MQTT! publish failed, is the message too long ?");
@@ -210,7 +137,7 @@ bool MqttServer::subscribe(
 		found = topicSubscriptionList[i].topic.equals(topic);
 
 	if (found) {
-		LOG_INFO("MQTT! Subscribed to [%s] already, ignored.\n", topic.c_str());
+		LOG_INFO("MQTT! Subscribed to [%s] already, ignored.", topic.c_str());
 		return false;
 	}
 
@@ -222,7 +149,7 @@ bool MqttServer::subscribe(
 			{topic, std::move(messageReceivedCallback), nullptr};
 
 	if (success)
-		LOG_INFO("MQTT: Subscribed to [%s]\n", topic.c_str());
+		LOG_INFO("MQTT: Subscribed to [%s]", topic.c_str());
 	else
 		LOG_ERROR("MQTT! subscribe failed");
 
@@ -252,7 +179,7 @@ bool MqttServer::unsubscribe(const String &topic)
 				found = true;
 				success = mqttClient.unsubscribe(topic.c_str());
 					if (success)
-						LOG_INFO("MQTT: Unsubscribed from %s\n",
+						LOG_INFO("MQTT: Unsubscribed from %s",
 								 topic.c_str());
 					else
 						LOG_ERROR("MQTT! unsubscribe failed");
@@ -273,8 +200,9 @@ bool MqttServer::unsubscribe(const String &topic)
 	return success;
 }
 
-void MqttServer::executeDelayed(const unsigned long delay,
-								DelayedExecutionCallback callback)
+void MqttServer::executeDelayed(
+	const unsigned long delay,
+	DelayedExecutionCallback callback)
 {
 	if (delayedExecutionListSize < MAX_DELAYED_EXECUTION_LIST_SIZE) {
 		DelayedExecutionRecord delayedExecutionRecord;
@@ -286,11 +214,8 @@ void MqttServer::executeDelayed(const unsigned long delay,
 		delayedExecutionListSize++;
 	}
 	else
-		LOG_INFO("SYS! The list of delayed functions is full.\n");
+		LOG_INFO("SYS! The list of delayed functions is full.");
 }
-
-
-// ================== Private functions ====================-
 
 void MqttServer::connectToMqttBroker()
 {
@@ -304,16 +229,15 @@ void MqttServer::connectToMqttBroker()
 		0,
 		mqttLastWillRetain,
 		mqttLastWillMessage,
-		mqttCleanSession)) {
+		mqttCleanSession))
+	{
 		mqttConnected = true;
-
-		LOG_INFO("Ok.");
+		LOG_INFO("MQTT_CONNECTION Ok.");
 
 		connectionEstablishedCount++;
 		connectionEstablishedCallback();
-	}
-	else
-		LOG_ERROR("Unable to connect, ");
+	} else {
+		LOG_ERROR("Unable to connect.");
 		switch (mqttClient.state()) {
 			case -4:LOG_INFO("MQTT_CONNECTION_TIMEOUT");
 				break;
@@ -334,6 +258,7 @@ void MqttServer::connectToMqttBroker()
 			case 5:LOG_INFO("MQTT_CONNECT_UNAUTHORIZED");
 				break;
 		}
+	}
 	lastMqttConnectionMillis = millis();
 }
 
@@ -389,7 +314,7 @@ void MqttServer::mqttMessageReceivedCallback(
 	if (strlen(topic) + length + 9 >= MQTT_MAX_PACKET_SIZE) {
 		strTerminationPos = length - 1;
 			LOG_INFO(
-				"MQTT! Your message may be truncated, please change MQTT_MAX_PACKET_SIZE of PubSubClient.h to a higher value.\n");
+				"MQTT! Your message may be truncated, please change MQTT_MAX_PACKET_SIZE of PubSubClient.h to a higher value.");
 	}
 	else
 		strTerminationPos = length;
@@ -400,7 +325,7 @@ void MqttServer::mqttMessageReceivedCallback(
 	String topicStr(topic);
 
 	// Logging
-	LOG_INFO("MQTT >> [%s] %s\n", topic, payloadStr.c_str());
+	LOG_INFO("MQTT << [%s] %s", topic, payloadStr.c_str());
 
 	// Send the message to subscribers
 	for (byte i = 0; i < topicSubscriptionListSize; i++) {

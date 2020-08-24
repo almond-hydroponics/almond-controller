@@ -4,6 +4,7 @@
 #include "Logger.h"
 #include "Serial.h"
 
+
 Logger LOG;
 
 Logger::Logger()
@@ -32,7 +33,7 @@ void Logger::setup_led(int _led_pin)
 {
 	this->led_pin = _led_pin;
 	pinMode(_led_pin, OUTPUT);
-	digitalWrite(_led_pin, 1);
+	digitalWrite(_led_pin, 0);
 	this->led_state = true;
 	this->led_timer.reset();
 }

@@ -102,35 +102,20 @@ String SetupWifi::getMacAddress()
 	return macStr;
 }
 
-bool SetupWifi::connected() const
-{
-	return wifi_ok;
-}
-
-void wifiLedOnConnect()
-{
-	digitalWrite(WIFI_LED, HIGH);
-	delay(500);
-	digitalWrite(WIFI_LED, LOW);
-	delay(500);
-}
-
 void SetupWifi::setupWifi()
 {
 	if (WiFi.status() != WL_CONNECTED) {
 		DEBUG_LOGLN("");
 		DEBUG_LOG("MAC ");
 		DEBUG_LOGLN(getMacAddress());
-		this->wifi_ok = false;
 
 		WiFi.mode(WIFI_STA);
 		wifiMulti.addAP(ssid, password);
 //		wifiMulti.addAP("Valar Morghulis", "valardohaeris14#");
-		LOG_INFO("Wifi try: %s", ssid );
+		LOG_INFO("Wifi connect to: %s", ssid );
 
 		int attempt = 0;
 		while (wifiMulti.run() != WL_CONNECTED) {
-			wifiLedOnConnect();
 			DEBUG_LOG(".");
 			DEBUG_LOG(attempt);
 			delay(500);
@@ -145,15 +130,10 @@ void SetupWifi::setupWifi()
 		}
 
 		LOG_INFO("Connected to %s - IP: %s", ssid, WiFi.localIP().toString().c_str() );
-//		if (enableSerialLogs) {
-//			LOG_INFO("Connected to %s - IP: %s", ssid, WiFi.localIP().toString().c_str() );
-//		}
 		randomSeed(micros());
 		setClock();
 
 		LOG_INFO("WiFi is ready.");
-		this->wifi_ok = true;
-		digitalWrite(WIFI_LED, HIGH);
 	}
 }
 
@@ -164,5 +144,4 @@ void SetupWifi::loopWifi()
 		checkClockStatus();
 		return;
 	}
-//	MilliSec currentMilliSec = millis();
 }

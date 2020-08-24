@@ -24,7 +24,7 @@ LogicStatus ApplicationLogic::get_status()
 
 bool ApplicationLogic::get_measurements(int *delays) const
 {
-	LOG_INFO("PLogic meas %u %u", measure_delay_p0_d0, measure_delay_p1_d1);
+	LOG_INFO("Almond Logic measurement %u %u", measure_delay_p0_d0, measure_delay_p1_d1);
 
 	if (measure_delay_p0_d0 <= 0 || measure_delay_p1_d1 <= 0) {
 		return false;
@@ -125,7 +125,6 @@ int ApplicationLogic::loop_timer(const Config_run_table_time *time_now)
 
 LogicStatus ApplicationLogic::calculate_status(int pump_value, int water_switch)
 {
-
 	// If we are on uncertain state, keep old status.
 	if (water_switch != 0 && water_switch != 1)
 		return status;
@@ -173,7 +172,7 @@ bool ApplicationLogic::run_logic(
 		return false;
 
 	int new_status_int = to_integral(new_status);
-	LOG_INFO("PLogic new status:  %d", new_status_int);
+	LOG_INFO("Almond Logic new status:  %d", new_status_int);
 
 	status = new_status;
 	if (output->get_value() != pump_value){

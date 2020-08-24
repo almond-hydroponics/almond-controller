@@ -19,6 +19,7 @@
 #include "Logger.h"
 #include "SecureCredentials.h"
 #include "Globals.h"
+#include <EEPROM.h>
 
 
 #ifndef STASSID
@@ -31,8 +32,10 @@ const char *password = STAPSK;
 const char *mqttServer = CONSTANTS.mqtt.mqtt_server;
 const char *mqttUsername = CONSTANTS.mqtt.mqtt_user;
 const char *mqttPassword = CONSTANTS.mqtt.mqtt_password;
-const char *mqttClientName = "MASHA";
-const short mqttPort = CONSTANTS.mqtt.mqtt_port;
+const char *mqttClientName = "almond_mqtt_" MAJOR_VER "_" MINOR_VER;
+short mqttPort = CONSTANTS.mqtt.mqtt_port;
+
+const char *ID = "sec_mqtt_client_" MAJOR_VER "_" MINOR_VER;
 
 String environmentDataPath = "/environment";
 String waterDataPath = "/water";
@@ -62,9 +65,9 @@ MqttServer client(
 	mqttServer,
 	mqttUsername,
 	mqttPassword,
+	setupWifi.getWiFiClient(),
 	mqttClientName,
-	mqttPort,
-	setupWifi.getWiFiClient()
+	mqttPort
 );
 
 static const int UPDATE_DELAY = 20;
@@ -116,7 +119,7 @@ static void logger_fatal_hook(const char *log_line)
 	}
 
 	// if we are not connected, we are not storing the messages for now.
-	if (setupWifi.connected() == false) return;
+	if (setupWifi.isReadyForProcessing() == false) return;
 
 	int buffer_len = Logger::max_line_len + 128;
 	int subject_len = 256;
@@ -309,19 +312,26 @@ void add_password_protected(const char *url, void (*handler)())
 void onConnectionEstablished()
 {
 	// Subscribe to "almond/Pump" and display received message on serial
-	client.subscribe("almond/Pump", [](const String & payload) {
-		Serial.println(payload);
-		LOG_INFO("Subscribed to almond/Pump");
+	client.subscribe("almond/pump", [](const String & payload) {
+		LOG_INFO("Subscribed to almond/pump");
 	});
 
 	// Publish a message to "almond/Pump
-	client.publish("almond/Test", "This is a test");
+	client.publish("almond/test", "This is a test.");
 
 	// Execute delayed instructions
 	client.executeDelayed(5 * 1000, []() {
-		client.publish("almond/Test", "This is a message sent after 5 seconds later");
-		LOG_INFO("Published to almond/Test");
+		client.publish("almond/test", "This is a message sent after 5 seconds later.");
+		LOG_INFO("Published to almond/test");
 	});
+}
+
+void wifiLedOnConnecting()
+{
+	digitalWrite(WIFI_LED, HIGH);
+	delay(500);
+	digitalWrite(WIFI_LED, LOW);
+	delay(500);
 }
 
 void setup()
@@ -337,10 +347,7 @@ void setup()
 	webserver_setup();
 
 	// setup mqtt
-//	client.enableDebuggingMessages();
 	client.enableLastWillMessage("almond/lastWill", "Going offline...");
-
-//	handle_set_ntp();
 
 	for (auto loop : DEVICES) loop->setup();
 
@@ -348,7 +355,6 @@ void setup()
 
 	WEBSERVER.on("/get/dev", handle_get_devices);
 	WEBSERVER.on("/get/time", handle_get_time);
-//	add_password_protected("ntp", []{ handle_http(handle_set_ntp()); });
 	add_password_protected("reboot", []{ handle_http(handle_reboot()); });
 }
 
@@ -392,12 +398,18 @@ void loop()
 
 	setupWifi.loopWifi();
 	// if wifi is not ready, don't do any other processing
-	if (setupWifi.connected() == false) return;
+	if (!setupWifi.isReadyForProcessing()) {
+		wifiLedOnConnecting();
+		return;
+	};
+	digitalWrite(WIFI_LED, HIGH);
 
-	client.loop();
+	// webserver loop
 	webserver_loop();
+	// mqtt loop
+	client.loop();
 
-	delay(10);
+		delay(10);
 
 	for (auto loop : DEVICES) loop->loop();
 
