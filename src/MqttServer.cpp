@@ -57,12 +57,6 @@ MqttServer::MqttServer(
 //	return (SetupWifi::connected() == true) & isMqttConnected();
 //}
 
-// Configuration functions, most of them must be called before the first loop() call
-//void MqttServer::enableDebuggingMessages(const bool enabled)
-//{
-//	enableSerialLogs = enabled;
-//}
-
 void MqttServer::enableMQTTPersistence()
 {
 	mqttCleanSession = false;

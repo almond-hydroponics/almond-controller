@@ -457,6 +457,4 @@ void loop()
 	} else {
 		handle_push_devices(false);
 	}
-
-//	delay(5000);
 }

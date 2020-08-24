@@ -43,7 +43,7 @@ void SetupWifi::setClock()
 	);
 
 	setClock_status = STARTED;
-	LOG_INFO("Waiting for NTP time sync: ");
+	LOG_INFO("Waiting for NTP time sync.");
 	setClock_AsyncWait.startWaiting(millis(), 1000);	// Log every 1 second
 	// Asynchronously wait for network response via checkClockStatus().
 
@@ -112,7 +112,7 @@ void SetupWifi::setupWifi()
 		WiFi.mode(WIFI_STA);
 		wifiMulti.addAP(ssid, password);
 //		wifiMulti.addAP("Valar Morghulis", "valardohaeris14#");
-		LOG_INFO("Wifi connect to: %s", ssid );
+		LOG_INFO("Wifi connecting to %s", ssid );
 
 		int attempt = 0;
 		while (wifiMulti.run() != WL_CONNECTED) {
@@ -121,7 +121,7 @@ void SetupWifi::setupWifi()
 			delay(500);
 			attempt++;
 
-			if (attempt == 100) {
+			if (attempt == 150) {
 				LOG_FATAL("Could not connect to WiFi: Rebooting");
 				delay(100);
 				ESP.restart();

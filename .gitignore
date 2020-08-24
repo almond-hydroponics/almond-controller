@@ -294,3 +294,4 @@ _deps
 build/*
 /src/keys/
 /certs/
+src/SecureCredentials.h
