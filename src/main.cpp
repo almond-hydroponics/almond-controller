@@ -2,6 +2,7 @@
 #define MINOR_VER "01"
 
 //Includes---------------------------------------------------------------------
+#include <EEPROM.h>
 #include "AlmondPrecompiled.h"
 #include "ApplicationConstants.h"
 #include "AlmondConfiguration.h"
@@ -19,7 +20,6 @@
 #include "Logger.h"
 #include "SecureCredentials.h"
 #include "Globals.h"
-#include <EEPROM.h>
 
 
 #ifndef STASSID
@@ -42,7 +42,7 @@ String waterDataPath = "/water";
 
 
 //Declarations-----------------------------------------------------------------
-DeviceRtc			DEV_RTC("rtc");
+DeviceRtc			DEV_RTC("time");
 WaterLevel			DEV_WLEVEL("water_level", PIN_TRIGGER, PIN_ECHO);
 EnvironmentSht		DEV_TEMP("temp");
 EnvironmentSht		DEV_HUMID("humid");
@@ -107,7 +107,7 @@ Device *const DEVICES[] = {
 	&DEV_STATUS,
 	&DEV_SWITCH
 };
-#define DEVICES_N (sizeof(DEVICES)/sizeof(Device*))
+#define DEVICES_N (sizeof(DEVICES) / sizeof(Device *))
 
 
 //Implementation---------------------------------------------------------------
@@ -231,23 +231,62 @@ static bool handle_set_email()
 }
 #endif
 
+static int raw_device_json(char *buffer)
+{
+	const int buffer_size = MESSAGE_MAX_LEN;
+	int buffer_offset = snprintf(buffer, buffer_size, "{");
+	unsigned int loop;
+	int ret;
+
+	for (loop = 0; loop < LOGGED_DEVICES; loop++)
+	{
+		Device *dev = DEVICES[loop];
+		ret = dev->jsonify(
+			buffer + buffer_offset,
+			buffer_size - buffer_offset
+		);
+
+		if (ret == 0) break;
+
+		buffer_offset += ret;
+
+		if (buffer_offset + 2 >= MESSAGE_MAX_LEN) break;
+
+		buffer[buffer_offset] = ',';
+		buffer[buffer_offset + 1] = 0;
+		buffer_offset += 1;
+	}
+
+	if (loop < LOGGED_DEVICES) {
+		// exited with break
+		return 0;
+	} else {
+		buffer[buffer_offset - 1] = '}';
+//		buffer[buffer_offset] = '}';
+		buffer[buffer_offset + 1] = 0;
+
+		return (buffer_offset + 1);
+	}
+}
+
 static bool handle_push_devices(bool force)
 {
-	int values[6];
-	for (unsigned int loop = 0; loop < 6; loop++)
-		values[loop] = DEVICES[loop]->get_value();
-//	LOG_INFO("Push data through MQTT: ");
+	static TimerOverride timer;
+	const int push_interval_s = PUSH_INTERVAL;
 
-//	int time = DEV_RTC.get_value();
-//	int humid = DEV_HUMID.get_value();
-//	int temp = DEV_TEMP.get_value();
-//	int waterLevel = DEV_WLEVEL.get_value();
-//
-//	LOG_INFO("Time from rtc: %d", time);
-//	LOG_INFO("Temp: %d, Humid: %d", temp, humid);
-//	LOG_INFO("Distance: %d \n", waterLevel);
+	if (force == false && timer.check(push_interval_s * 1000) == false)
+		return false;
+	timer.reset();
 
-	return force;
+	char *buffer = (char *)malloc(1024);
+	if (buffer == nullptr) return false;
+	raw_device_json(buffer);
+
+	// send data through publish topic
+	bool ret = client.publish("almond/data", buffer);
+	free(buffer);
+
+	return ret;
 }
 
 static bool handle_set_push()
@@ -373,7 +412,7 @@ static void handle_serial()
 	} else if (strcmp(line, "push") == 0) {
 		handle_set_push();
 	} else {
-		LOG_WARN("Invalid command\n");
+		LOG_WARN("Invalid command");
 	}
 }
 #endif
@@ -409,7 +448,7 @@ void loop()
 	// mqtt loop
 	client.loop();
 
-		delay(10);
+	delay(10);
 
 	for (auto loop : DEVICES) loop->loop();
 
@@ -457,4 +496,6 @@ void loop()
 	} else {
 		handle_push_devices(false);
 	}
+	handle_set_push();
+	delay(30000);
 }

@@ -95,7 +95,7 @@ extern const Constants CONSTANTS;
 #define PIN_LED		3	// board pin 3
 
 // Interval time(ms) for sending message to IoT Hub
-#define INTERVAL 2000
+#define PUSH_INTERVAL 2000
 
 // EEPROM address configuration
 #define EEPROM_SIZE 512
@@ -107,6 +107,7 @@ extern const Constants CONSTANTS;
 #define CONNECTION_STRING_LEN 256
 
 #define MESSAGE_MAX_LEN 256
+#define LOGGED_DEVICES 3
 
 /**
  * IoT Hub Device Connection String setup
