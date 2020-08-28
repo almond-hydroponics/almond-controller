@@ -41,7 +41,7 @@ int Device::jsonify(char *buffer, int buffer_len)
 	int len = snprintf(
 		buffer,
 		buffer_len,
-		R"({"name":"%s","value":%d})",
+		R"("%s":%d)",
 		name,
 		value
 	);

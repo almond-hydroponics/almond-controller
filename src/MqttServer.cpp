@@ -1,6 +1,7 @@
 //Includes---------------------------------------------------------------------
 #include "MqttServer.h"
 #include "Logger.h"
+#include "ApplicationConstants.h"
 
 
 //Implementation---------------------------------------------------------------
@@ -317,6 +318,8 @@ void MqttServer::mqttMessageReceivedCallback(
 	payload[strTerminationPos] = '\0';
 	String payloadStr((char *)payload);
 	String topicStr(topic);
+
+	digitalWrite(PIN_PUMP, payloadStr.toInt());
 
 	// Logging
 	LOG_INFO("MQTT << [%s] %s", topic, payloadStr.c_str());
