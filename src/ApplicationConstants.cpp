@@ -8,13 +8,13 @@ const Constants CONSTANTS = {
 	.email = {
 		.server_host = "smtp.gmail.com",
 		.server_port = 465,
-		.login = "almond.froyo@gmail.com",
-		.password = "Froyogreen",
-		.receiver = "francismasha96@gmail.com",
+		.login = "",
+		.password = "",
+		.receiver = "",
 	},
 	.wlan = {
-		.ssid = "Masha",
-		.password = "20021988",
+		.ssid = "",
+		.password = "",
 	},
 	.runtable = {    // Run the pump for 1min every 15min from 7:00 to 20:00
 		.active_start = {.hour = 7, .minute = 0, .second = 0},
@@ -34,9 +34,9 @@ const Constants CONSTANTS = {
 	},
 	.firebase = {
 		.firebase_host = "almond-data.firebaseio.com",
-		.firebase_token = "hryGBdsP9la99hmfc57UbLztBCQDRe8FmgmvbJ3e"
+		.firebase_token = ""
 	},
-	.azure_connection = "HostName=almond-hub.azure-devices.net;DeviceId=almond;SharedAccessKey=4U1zFRpk9YD44aXLety+NzbvAQqosz7i6vZPSCVEpwI=",
+	.azure_connection = "",
 	.hostname = "almond",
 	.password = "",
 	.timezone_h = 3,
