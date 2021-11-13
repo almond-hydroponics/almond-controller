@@ -15,8 +15,8 @@ class DeviceRtc: public DeviceInput
 public:
 	explicit DeviceRtc(const char *name);
 	void loop() override;
-	[[noreturn]] void setup() override;
-	static void update_time(uint32_t ntp_time);
+	void setup() override;
+	void update_time(uint32_t ntp_time);
 	void time_of_day(Config_run_table_time *time);
 
 protected:

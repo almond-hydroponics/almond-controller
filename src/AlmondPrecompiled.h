@@ -1,19 +1,24 @@
 #pragma once
 
-
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #include <Arduino.h>
-#include <Wire.h>
-#include <cstdio>
-#include <cstdarg>
-#include <cstring>
-#include <climits>
-#include <ctime>
-#include <cstdint>
-#include <FS.h>
-#include <WiFiClientSecure.h>
+#include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266httpUpdate.h>
 #include <ESP8266WiFiMulti.h>
+#include <ESP8266httpUpdate.h>
 #include <ESP8266mDNS.h>
+#include <WiFiClientSecure.h>
+#include <WiFiUdp.h>
+#include <Wire.h>
+
+#include <climits>
+#include <cstdarg>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+#include <string>
+#include <sstream>
+
+#include "FS.h"
 #include "base64.h"

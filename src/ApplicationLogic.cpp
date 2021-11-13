@@ -29,7 +29,7 @@ bool ApplicationLogic::get_measurements(int *delays) const
 	if (measure_delay_p0_d0 <= 0 || measure_delay_p1_d1 <= 0) {
 		return false;
 	}
-#define CLAMP_TO_INT_MAX(x) ( x < INT_MAX ) ? x : INT_MAX ;
+#define CLAMP_TO_INT_MAX(x) ( (x) < INT_MAX ) ? (x) : INT_MAX ;
 
 	delays[0] = CLAMP_TO_INT_MAX(measure_delay_p0_d0);
 	delays[1] = CLAMP_TO_INT_MAX(measure_delay_p1_d1);

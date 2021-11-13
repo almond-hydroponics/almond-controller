@@ -5,7 +5,10 @@
 
 
 //Declarations-----------------------------------------------------------------
-ESP8266WebServer WEBSERVER(80);
+ESP8266WebServer server(80);
+
+const char* www_username = "almond";
+const char* www_password = "froyogreen";
 
 
 //Implementation---------------------------------------------------------------
@@ -13,7 +16,7 @@ char *webserver_get_buffer()
 {
 	char *buffer = (char *)malloc(WEBSERVER_MAX_RESPONSE_SIZE);
 	if (buffer == nullptr) {
-		WEBSERVER.send(500, "text/plain", "Server error!");
+		server.send(500, "text/plain", "Server error!");
 		return nullptr;
 	}
 	return buffer;
@@ -62,7 +65,7 @@ static void handle_log()
 	strncat(buffer, json_stop, 3);
 	total_len += 3;
 
-	WEBSERVER.send(200, "application/json", buffer);
+	server.send(200, "application/json", buffer);
 	free(buffer);
 }
 
@@ -91,21 +94,27 @@ static void handle_status()
 		uptime.seconds
 	);
 
-	WEBSERVER.send(200, "application/json", buffer);
+	server.send(200, "application/json", buffer);
 	free(buffer);
 }
 
 void webserver_setup()
 {
-	WEBSERVER.on("/get/log", handle_log);
-	WEBSERVER.on("/get/status", handle_status);
-	WEBSERVER.serveStatic("/", SPIFFS, "/index.html", "max-age=86400");
-	WEBSERVER.serveStatic("/data/", SPIFFS, "/", "max-age=86400");
-	WEBSERVER.onNotFound([]() { WEBSERVER.send(404, "text/plain", "Page not found"); });
-	WEBSERVER.begin();
+		server.on("/", []() {
+				if (!server.authenticate(www_username, www_password)) {
+						return server.requestAuthentication();
+				}
+				server.send(200, "text/plain", "Login OK");
+		});
+//	server.on("/get/log", handle_log);
+//	server.on("/get/status", handle_status);
+//	server.serveStatic("/", SPIFFS, "/index.html", "max-age=86400");
+//	server.serveStatic("/data/", SPIFFS, "/", "max-age=86400");
+	server.onNotFound([]() { server.send(404, "text/plain", "Page not found"); });
+	server.begin();
 }
 
 void webserver_loop()
 {
-	WEBSERVER.handleClient();
+	server.handleClient();
 }

@@ -15,6 +15,7 @@ public:
 	void loop();
 
 	static unsigned int get_free_heap();
+	static int get_device_id() ;
 
 protected:
 	static void setup_i2c();

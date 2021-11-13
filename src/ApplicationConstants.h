@@ -94,8 +94,8 @@ extern const Constants CONSTANTS;
 #define PIN_WDETECT	13	// board pin 7
 #define PIN_LED		3	// board pin 3
 
-// Interval time(ms) for sending message to IoT Hub
-#define PUSH_INTERVAL 2000
+// Interval time(ms) for sending message though mqtt -> 1min
+#define PUSH_INTERVAL 60000
 
 // EEPROM address configuration
 #define EEPROM_SIZE 512
@@ -106,21 +106,9 @@ extern const Constants CONSTANTS;
 #define PASS_LEN 32
 #define CONNECTION_STRING_LEN 256
 
-#define MESSAGE_MAX_LEN 256
+#define MESSAGE_MAX_LEN 4096
 #define LOGGED_DEVICES 3
 
-/**
- * IoT Hub Device Connection String setup
- * Find your Device Connection String by going to your Azure portal, creating (or navigating to) an IoT Hub,
- * navigating to IoT Devices tab on the left, and creating (or selecting an existing) IoT Device.
- * Then click on the named Device ID, and you will have able to copy the Primary or Secondary Device Connection String to this sample.
- */
-#define AZURE_DEVICE_CONNECTION_STRING	CONSTANTS.azure_connection
+#define MQTT_MAX_PACKET_SIZE 512
 
-// The protocol you wish to use should be uncommented
-#define ALMOND_MQTT
-//#define ALMOND_HTTP
-
-// Interval time(ms) for sending message to IoT Hub
-#define AZURE_INTERVAL 2000
-
+#define N_DIMMERS 3

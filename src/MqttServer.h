@@ -78,7 +78,7 @@ private:
 	bool mqttCleanSession{};
 	bool mqttLastWillRetain{};
 
-	PubSubClient mqttClient;
+	PubSubClient mqttClient{};
 
 	struct TopicSubscriptionRecord
 	{

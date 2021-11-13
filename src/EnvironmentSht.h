@@ -6,6 +6,8 @@
 #include "TimerOverride.h"
 #include "../lib/sht-sensor-lib/sht21.h"
 
+
+//Implementation---------------------------------------------------------------
 class EnvironmentSht: public DeviceInput
 {
 public:

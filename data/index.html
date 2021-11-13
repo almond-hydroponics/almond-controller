@@ -3,110 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Almond</title>
-  <link href="/data/style.css" rel="stylesheet" type="text/css">
-  <script type="text/javascript" src="/data/almond.js"></script>
+  <link
+          rel="shortcut icon"
+          href="https://storage.googleapis.com/static.almondhydroponics.com/static/icons/favicon.ico"
+  />
+  <link
+          href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@100;200;300;400;500;700;900&display=swap"
+          rel="stylesheet"
+  />
+  <link href="/data/styles.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet"
+        href="//fonts.googleapis.com/css?family=Roboto:100,300,400,500,700|Google+Sans:300,400|Product+Sans:400&amp;lang=en">
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <style>
+      body {
+          color: #434343;
+          font-family: "Google Sans", Roboto, Helvetica Neue, sans-serif;
+          font-size: 14px;
+          line-height: 1.42857142857143;
+          padding: 20px;
+      }
 
+      .container {
+          margin: 25vh auto;
+          max-width: 400px;
+      }
+
+      form .field-group {
+          box-sizing: border-box;
+          clear: both;
+          padding: 4px 0;
+          position: relative;
+          margin: 1px 0;
+          width: 100%;
+      }
+
+      form .field-group > label {
+          /*color: #757575;*/
+          display: block;
+          margin: 0 0 5px 0;
+          padding: 5px 0 0;
+          position: relative;
+          word-wrap: break-word;
+      }
+
+      /*input[type=text] {*/
+      /*    background: #fff;*/
+      /*    border: 1px solid #d0d0d0;*/
+      /*    border-radius: 4px;*/
+      /*    box-sizing: border-box;*/
+      /*    color: #434343;*/
+      /*    font-family: inherit;*/
+      /*    font-size: inherit;*/
+      /*    !*height: 3.14285714em;*!*/
+      /*    !*line-height: 1.4285714285714;*!*/
+      /*    padding: 4px 20px;*/
+      /*    margin: 0;*/
+      /*    width: 100%;*/
+      /*}*/
+
+      /*input[type=text]:focus {*/
+      /*    border-color: #2573b5 !important;*/
+      /*    outline: 0;*/
+      /*    background-color: #dddee5;*/
+      /*}*/
+
+      .button-container {
+          box-sizing: border-box;
+          clear: both;
+          margin: 1px 0 0;
+          padding: 4px 0;
+          position: relative;
+          width: 100%;
+      }
+
+      button[type=submit] {
+          box-sizing: border-box;
+          border: 1px solid #bdbdbd;
+          border-radius: 4px;
+          color: #ffffff;
+          background-color: #2573b5;
+          cursor: pointer;
+          display: inline-block;
+          font-family: inherit;
+          font-size: 14px;
+          font-variant: normal;
+          font-weight: 500;
+          width: 100%;
+          margin: 0;
+          padding: 12px 24px;
+          text-decoration: none;
+          vertical-align: baseline;
+          white-space: nowrap;
+          text-transform: capitalize;
+      }
+  </style>
+  <title>Almond Hydroponics Configuration</title>
 </head>
 <body>
-<nav class="nav" tabindex="-1" onclick="this.focus()">
-  <div class="container">
-    <a class="pagename current" href="#" onclick="update_all();"> Almond</a>
-  </div>
-</nav>
 <div class="container">
-
-  <h1> Status </h1>
-  <table class="table">
-
-    <tbody>
-    <tr>
-      <th width="30%">Status</th>
-      <td id="data_status_status"></td>
-    </tr>
-    <tr>
-      <th>Uptime</th>
-      <td id="data_status_uptime"></td>
-    </tr>
-    <tr>
-      <th>Local time</th>
-      <td id="data_status_time"></td>
-    </tr>
-    </tbody>
-  </table>
-
-
-  <h1> Devices </h1>
-  <table class="table">
-    <thead>
-    <tr>
-      <th width="30%">Name</th>
-      <th>Status</th>
-    </thead>
-    <tbody id="data_dev"></tbody>
-  </table>
-
-  <h1> Log </h1>
-  <p id="data_log"></p>
-
+  <h1 style="text-align: center;">Setup Almond WiFi</h1>
+  <form method="post" action="/">
+    <div class="field-group">
+      <label class="pure-material-textfield-outlined">
+        <input placeholder=" " name="username" type="text">
+        <span>Username</span>
+      </label>
+    </div>
+    <div class="field-group">
+      <label class="pure-material-textfield-outlined">
+        <input placeholder=" " name="password" type="text">
+        <span>Password</span>
+      </label>
+    </div>
+    <div class="button-container">
+      <button type="submit">SAVE</button>
+    </div>
+  </form>
 </div>
-
-<script type="text/javascript">
-
-  function get_target(elem) {
-    return document.getElementById("data_" + elem);
-  }
-
-  function time_to_str(jobj) {
-    return jobj.hour + ":" + jobj.min + ":" + jobj.sec;
-  }
-
-  function update_status() {
-    make_json_request("/get/status", function (jobj) {
-
-      get_target("status_status").innerHTML = jobj.status;
-      get_target("status_uptime").innerHTML = time_to_str(jobj);
-    });
-  }
-
-  function update_time() {
-    make_json_request("/get/time", function (jobj) {
-
-      get_target("status_time").innerHTML = time_to_str(jobj);
-    });
-  }
-
-  function update_devices() {
-    make_json_request("/get/dev", function (jobj) {
-      var text = "";
-      var entries = jobj.dev;
-      for (var loop = 0; loop < entries.length; loop++) {
-        var item = entries[loop];
-        text = text + "<tr><td>" + item.name + "</td><td>" + item.value + "</td></tr>"
-      }
-      get_target("dev").innerHTML = text;
-    });
-  }
-
-  function update_log() {
-    make_json_request("/get/log", function (jobj) {
-      var entries = jobj.log;
-      var text = "";
-      for (var loop = 0; loop < entries.length; loop++) {
-        text = text + entries[loop] + "\n"
-      }
-      get_target("log").innerHTML = "<pre>" + text + "</pre>";
-    });
-  }
-
-  function update_all() {
-    update_status();
-    update_devices();
-    update_log();
-    update_time();
-  }
-
-  update_all();
-</script>
 </body>
 </html>

@@ -295,3 +295,7 @@ build/*
 /src/keys/
 /certs/
 src/SecureCredentials.h
+src/AlmondSecrets.h
+src/ApplicationConstants.cpp
+certificates
+/certificates/
