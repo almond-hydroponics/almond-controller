@@ -7,10 +7,10 @@
 // Note: G++ seems to require that these are in the proper order (same as declared).
 const Constants CONSTANTS = {
 	.email = {
-		.server_host = "smtp.gmail.com",
-		.server_port = 465,
-		.login = "almond.froyo@gmail.com",
-		.password = "Froyogreen",
+		.server_host = EMAIL_HOST,
+		.server_port = EMAIL_PORT,
+		.login = EMAIL_LOGIN,
+		.password = EMAIL_PASSWORD,
 		.receiver = "francismasha96@gmail.com",
 	},
 	.wlan = {
@@ -28,17 +28,17 @@ const Constants CONSTANTS = {
 		.threshold_water_up_s = 10,
 	},
 	.mqtt = {
-		.mqtt_server = "mqtt.froyohydroponics.com",
-		.mqtt_port = 8883,
-		.mqtt_user = "almond",
-		.mqtt_password = "froyogreen"
+		.mqtt_server = MQTT_SERVER_URL,
+		.mqtt_port = MQTT_PORT,
+		.mqtt_user = MQTT_USER,
+		.mqtt_password = MQTT_PASSWORD
 	},
 	.firebase = {
-		.firebase_host = "almond-data.firebaseio.com",
-		.firebase_token = "hryGBdsP9la99hmfc57UbLztBCQDRe8FmgmvbJ3e"
+		.firebase_host = FIREBASE_HOST,
+		.firebase_token = FIREBASE_TOKEN
 	},
-	.azure_connection = "HostName=almond-hub.azure-devices.net;DeviceId=almond;SharedAccessKey=4U1zFRpk9YD44aXLety+NzbvAQqosz7i6vZPSCVEpwI=",
-	.hostname = "almond",
+	.azure_connection = AZURE_CONNECTION,
+	.hostname = AZURE_HOSTNAME,
 	.password = "",
 	.timezone_h = 3,
 	.baudrate = 115200
