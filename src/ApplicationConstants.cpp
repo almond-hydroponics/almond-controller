@@ -35,10 +35,9 @@ const Constants CONSTANTS = {
 	},
 	.firebase = {
 		.firebase_host = FIREBASE_HOST,
-		.firebase_token = FIREBASE_TOKEN
+		.firebase_token = FIREBASE_TOKEN,
+		.firebase_server_key = FIREBASE_FCM_SERVER_KEY
 	},
-	.azure_connection = AZURE_CONNECTION,
-	.hostname = AZURE_HOSTNAME,
 	.password = "",
 	.timezone_h = 3,
 	.baudrate = 115200

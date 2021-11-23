@@ -1,15 +1,13 @@
 #pragma once
 
-
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #include <AlmondPrecompiled.h>
 #include <ApplicationConstants.h>
 
-
-//Types------------------------------------------------------------------------
+// Types------------------------------------------------------------------------
 class AlmondOTA
 {
 public:
-	static void setup();
-	static void loop();
+		static void setup();
+		static void loop();
 };

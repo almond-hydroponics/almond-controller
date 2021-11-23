@@ -26,8 +26,8 @@ add_custom_target(
 
 add_custom_target(
     Debug ALL
-    COMMAND platformio -c clion run --target debug "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
+    COMMAND platformio -c clion debug "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(Z_DUMMY_TARGET ${SRC_LIST} src/AlmondSecrets.h src/AlmondOTA.cpp src/AlmondOTA.h)
+add_executable(Z_DUMMY_TARGET ${SRC_LIST})

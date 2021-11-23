@@ -20,12 +20,6 @@ unsigned int AlmondConfiguration::get_free_heap()
 	return ESP.getFreeHeap();
 }
 
-int AlmondConfiguration::get_device_id()
-{
-		LOG_INFO("ESP8266 Chip id = %08X", ESP.getChipId());
-		return ESP.getChipId();
-}
-
 void AlmondConfiguration::setup_i2c()
 {
 	Wire.begin(PIN_SDA, PIN_SCL);
