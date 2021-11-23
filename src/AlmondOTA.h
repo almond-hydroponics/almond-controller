@@ -7,7 +7,7 @@
 // Types------------------------------------------------------------------------
 class AlmondOTA
 {
-public:
-		static void setup();
-		static void loop();
+	public:
+	static void setup();
+	static void loop();
 };

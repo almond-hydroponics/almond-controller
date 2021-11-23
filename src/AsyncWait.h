@@ -1,7 +1,6 @@
 #pragma once
 
-
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #if (ARDUINO >= 100)
 #include <Arduino.h>
 #else
@@ -10,17 +9,13 @@
 
 #include <climits>
 
-
-//Types------------------------------------------------------------------------
+// Types------------------------------------------------------------------------
 using MilliSec = unsigned long;
 
 class AsyncWait
 {
-public:
-	AsyncWait()
-	{
-		reset();
-	}
+	public:
+	AsyncWait() { reset(); }
 
 	void startWaiting(MilliSec currentMilliSec, MilliSec durationWait)
 	{
@@ -31,10 +26,12 @@ public:
 
 	bool isWaiting(MilliSec currentMilliSec)
 	{
-		if (!isAsyncWaiting) return false;
+		if (!isAsyncWaiting)
+			return false;
 
 		MilliSec delta = calculateMilliSecDelta(currentMilliSec);
-		if (delta >= waitDuration) {
+		if (delta >= waitDuration)
+		{
 			reset();
 			return false;
 		}
@@ -43,12 +40,9 @@ public:
 		return true;
 	}
 
-	void cancel()
-	{
-		reset();
-	}
+	void cancel() { reset(); }
 
-private:
+	private:
 	bool isAsyncWaiting{};
 	MilliSec waitStartMilliSec{};
 	MilliSec waitDuration{};
@@ -62,16 +56,18 @@ private:
 
 	/**
 	 * Calculate the difference between currentMilliSec and waitStartMilliSec
-     * taking into account the event when 'millis()' wraps around.
+	 * taking into account the event when 'millis()' wraps around.
 	 * @param currentMilliSec
 	 * @return
 	 */
 	MilliSec calculateMilliSecDelta(MilliSec currentMilliSec) const
 	{
-		if (currentMilliSec < waitStartMilliSec) {
+		if (currentMilliSec < waitStartMilliSec)
+		{
 			return ULLONG_MAX - waitStartMilliSec + currentMilliSec;
 		}
-		else {
+		else
+		{
 			return currentMilliSec - waitStartMilliSec;
 		}
 	}

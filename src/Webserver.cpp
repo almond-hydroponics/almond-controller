@@ -1,21 +1,20 @@
-//Includes---------------------------------------------------------------------
-#include "AlmondPrecompiled.h"
+// Includes---------------------------------------------------------------------
 #include "Webserver.h"
+#include "AlmondPrecompiled.h"
 #include "Logger.h"
 
-
-//Declarations-----------------------------------------------------------------
+// Declarations-----------------------------------------------------------------
 ESP8266WebServer server(80);
 
 const char* www_username = "almond";
 const char* www_password = "froyogreen";
 
-
-//Implementation---------------------------------------------------------------
-char *webserver_get_buffer()
+// Implementation---------------------------------------------------------------
+char* webserver_get_buffer()
 {
-	char *buffer = (char *)malloc(WEBSERVER_MAX_RESPONSE_SIZE);
-	if (buffer == nullptr) {
+	char* buffer = (char*)malloc(WEBSERVER_MAX_RESPONSE_SIZE);
+	if (buffer == nullptr)
+	{
 		server.send(500, "text/plain", "Server error!");
 		return nullptr;
 	}
@@ -24,31 +23,36 @@ char *webserver_get_buffer()
 
 static void handle_log()
 {
-	char *buffer = webserver_get_buffer();
+	char* buffer = webserver_get_buffer();
 
 	if (buffer == nullptr)
 		return;
 
 	int len = 0;
 	int total_len = 0;
-	for (int loop = 0; loop < 100; loop++) buffer[loop] = 'F';
+	for (int loop = 0; loop < 100; loop++)
+		buffer[loop] = 'F';
 
-	const char *json_start = "{\"log\":[";
+	const char* json_start = "{\"log\":[";
 	len = strlen(json_start);
 
 	memcpy(buffer, json_start, len + 1);
 	total_len += len;
 
-	for (int loop = 0; loop < Logger::max_lines; loop++) {
-		const char *log_line = LOG.get_log_line(loop);
+	for (int loop = 0; loop < Logger::max_lines; loop++)
+	{
+		const char* log_line = LOG.get_log_line(loop);
 
 		if (log_line == nullptr)
 			break;
 
-		if (loop > 0) {
+		if (loop > 0)
+		{
 			strncat(buffer + total_len, ",\"", 2);
 			total_len += 2;
-		} else {
+		}
+		else
+		{
 			strncat(buffer + total_len, "\"", 1);
 			total_len += 1;
 		}
@@ -61,7 +65,7 @@ static void handle_log()
 		total_len += 1;
 	}
 
-	const char *json_stop = "]}\n";
+	const char* json_stop = "]}\n";
 	strncat(buffer, json_stop, 3);
 	total_len += 3;
 
@@ -71,12 +75,15 @@ static void handle_log()
 
 static void handle_status()
 {
-	char *buffer = webserver_get_buffer();
-	const char *status;
+	char* buffer = webserver_get_buffer();
+	const char* status;
 
-	if (LOG.get_status() == Logger::Status::RUNNING) {
+	if (LOG.get_status() == Logger::Status::RUNNING)
+	{
 		status = "Running";
-	} else {
+	}
+	else
+	{
 		status = "Error";
 	}
 
@@ -84,15 +91,9 @@ static void handle_status()
 	memset(&uptime, 0x00, sizeof(uptime));
 	get_uptime(&uptime);
 
-	snprintf(
-		buffer,
-		WEBSERVER_MAX_RESPONSE_SIZE,
-		R"({"status":"%s","hour":%u,"min":%u,"sec":%u})",
-		status,
-		uptime.hours,
-		uptime.minutes,
-		uptime.seconds
-	);
+	snprintf(buffer, WEBSERVER_MAX_RESPONSE_SIZE,
+	         R"({"status":"%s","hour":%u,"min":%u,"sec":%u})", status,
+	         uptime.hours, uptime.minutes, uptime.seconds);
 
 	server.send(200, "application/json", buffer);
 	free(buffer);
@@ -100,21 +101,21 @@ static void handle_status()
 
 void webserver_setup()
 {
-		server.on("/", []() {
-				if (!server.authenticate(www_username, www_password)) {
-						return server.requestAuthentication();
-				}
-				server.send(200, "text/plain", "Login OK");
-		});
-//	server.on("/get/log", handle_log);
-//	server.on("/get/status", handle_status);
-//	server.serveStatic("/", SPIFFS, "/index.html", "max-age=86400");
-//	server.serveStatic("/data/", SPIFFS, "/", "max-age=86400");
+	server.on("/",
+	          []()
+	          {
+							if (!server.authenticate(www_username, www_password))
+							{
+								return server.requestAuthentication();
+							}
+							server.send(200, "text/plain", "Login OK");
+						});
+	//	server.on("/get/log", handle_log);
+	//	server.on("/get/status", handle_status);
+	//	server.serveStatic("/", SPIFFS, "/index.html", "max-age=86400");
+	//	server.serveStatic("/data/", SPIFFS, "/", "max-age=86400");
 	server.onNotFound([]() { server.send(404, "text/plain", "Page not found"); });
 	server.begin();
 }
 
-void webserver_loop()
-{
-	server.handleClient();
-}
+void webserver_loop() { server.handleClient(); }

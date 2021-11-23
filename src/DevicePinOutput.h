@@ -1,20 +1,18 @@
 #pragma once
 
-
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
 #include "Device.h"
 
-
-//Types------------------------------------------------------------------------
-class DevicePinOutput: public DeviceOutput
+// Types------------------------------------------------------------------------
+class DevicePinOutput : public DeviceOutput
 {
-public:
-	DevicePinOutput(const char *name, uint8_t pin, bool invert);
+	public:
+	DevicePinOutput(const char* name, uint8_t pin, bool invert);
 	void setup() override;
 	void set_value(int value, bool verbose = false) override;
 
-protected:
+	protected:
 	uint8_t pin;
 	bool invert;
 };

@@ -1,24 +1,28 @@
 #pragma once
 
-
-//Includes---------------------------------------------------------------------
-#include <ESP8266WiFi.h>
+// Includes---------------------------------------------------------------------
 #include "TimerOverride.h"
+#include <ESP8266WiFi.h>
 
-
-//Types------------------------------------------------------------------------
-typedef void (*LoggerFatalHook)(const char *error_line);
+// Types------------------------------------------------------------------------
+typedef void (*LoggerFatalHook)(const char* error_line);
 
 class Logger
 {
-public:
+	public:
 	enum class Status
 	{
-		BOOTING, RUNNING, ERROR
+		BOOTING,
+		RUNNING,
+		ERROR
 	};
 	enum class Level
 	{
-		DEBUG, INFO, WARNING, ERROR, FATAL
+		DEBUG,
+		INFO,
+		WARNING,
+		ERROR,
+		FATAL
 	};
 
 	static const int max_lines = 50;
@@ -26,21 +30,21 @@ public:
 
 	Logger();
 
-	void setup_serial(const char *hostname, int baudrate = 9600);
+	void setup_serial(const char* hostname, int baudrate = 9600);
 	void setup_led(int _led_pin);
 	void setup_fatal_hook(LoggerFatalHook hook);
 
 	Logger::Status get_status();
 	void set_status(Logger::Status status);
 
-	void log(Logger::Level level, const __FlashStringHelper *format, ...);
+	void log(Logger::Level level, const __FlashStringHelper* format, ...);
 
 	/// @returns pointer to the given line or NULL if not that many lines
-	const char *get_log_line(int line_number);
+	const char* get_log_line(int line_number);
 
 	void loop();
 
-private:
+	private:
 	TimerOverride led_timer;
 	LoggerFatalHook fatal_hook;
 	int line_loop;
@@ -59,11 +63,15 @@ struct InfoUptime
 	unsigned int seconds;
 };
 
-void get_uptime(InfoUptime *uptime);
+void get_uptime(InfoUptime* uptime);
 
 extern Logger LOG;
 
-#define LOG_INFO(format, ...) LOG.log( Logger::Level::INFO, F(format) , ## __VA_ARGS__ )
-#define LOG_WARN(format, ...) LOG.log( Logger::Level::WARNING, F(format), ## __VA_ARGS__ )
-#define LOG_ERROR(format, ...) LOG.log( Logger::Level::ERROR, F(format), ## __VA_ARGS__ )
-#define LOG_FATAL(format, ...) LOG.log( Logger::Level::FATAL, F(format), ## __VA_ARGS__ )
+#define LOG_INFO(format, ...)                                                  \
+	LOG.log(Logger::Level::INFO, F(format), ##__VA_ARGS__)
+#define LOG_WARN(format, ...)                                                  \
+	LOG.log(Logger::Level::WARNING, F(format), ##__VA_ARGS__)
+#define LOG_ERROR(format, ...)                                                 \
+	LOG.log(Logger::Level::ERROR, F(format), ##__VA_ARGS__)
+#define LOG_FATAL(format, ...)                                                 \
+	LOG.log(Logger::Level::FATAL, F(format), ##__VA_ARGS__)

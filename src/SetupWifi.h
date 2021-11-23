@@ -1,37 +1,27 @@
 #pragma once
 
-
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #include <utility>
 
 #include "AlmondPrecompiled.h"
 #include "ApplicationConstants.h"
 #include "AsyncWait.h"
 #include "DeviceRtc.h"
-#include "Logger.h"
 #include "Globals.h"
+#include "Logger.h"
 
-
-//Types------------------------------------------------------------------------
+// Types------------------------------------------------------------------------
 class SetupWifi
 {
-public:
-	SetupWifi(
-		const char *ssid_,
-		const char *password_,
-		const char *ca_cert_PROG_,
-		const char *client_cert_PROG_,
-		const char *client_key_PROG_
-		)
-		: ssid(ssid_)
-		, password(password_)
-		, ca_cert_PROG(ca_cert_PROG_)
-		, client_cert_PROG(client_cert_PROG_)
-		, client_key_PROG(client_key_PROG_)
+	public:
+	SetupWifi(const char* ssid_, const char* password_, const char* ca_cert_PROG_,
+	          const char* client_cert_PROG_, const char* client_key_PROG_)
+			: ssid(ssid_), password(password_), ca_cert_PROG(ca_cert_PROG_),
+				client_cert_PROG(client_cert_PROG_), client_key_PROG(client_key_PROG_)
 
-		, x509CaCert(ca_cert_PROG)
-		, x509ClientCert(client_cert_PROG)
-		, PrivateClientKey(client_key_PROG)
+				,
+				x509CaCert(ca_cert_PROG), x509ClientCert(client_cert_PROG),
+				PrivateClientKey(client_key_PROG)
 	{
 		wifiClient.setTrustAnchors(&x509CaCert);
 		wifiClient.setClientRSACert(&x509ClientCert, &PrivateClientKey);
@@ -39,26 +29,20 @@ public:
 
 	virtual ~SetupWifi() = default;
 
-	WiFiClient &getWiFiClient()
-	{
-		return wifiClient;
-	}
+	WiFiClient& getWiFiClient() { return wifiClient; }
 
-	bool isReadyForProcessing()
-	{
-		return (setClock_status > FINISHED);
-	}
+	bool isReadyForProcessing() { return (setClock_status > FINISHED); }
 
 	static String getMacAddress();
 	void setupWifi();
 	void loopWifi();
 
-private:
-	const char *ssid;
-	const char *password;
-	const char *ca_cert_PROG;
-	const char *client_cert_PROG;
-	const char *client_key_PROG;    // KEEP THIS VALUE PRIVATE AND SECURE!!!
+	private:
+	const char* ssid;
+	const char* password;
+	const char* ca_cert_PROG;
+	const char* client_cert_PROG;
+	const char* client_key_PROG; // KEEP THIS VALUE PRIVATE AND SECURE!!!
 
 	BearSSL::WiFiClientSecure wifiClient;
 	BearSSL::X509List x509CaCert;
@@ -70,7 +54,11 @@ private:
 	// rather than always testing for SUCCESS || FAILED.
 	enum status
 	{
-		NOT_STARTED, STARTED, FINISHED, SUCCESS, FAILED
+		NOT_STARTED,
+		STARTED,
+		FINISHED,
+		SUCCESS,
+		FAILED
 	};
 	status setClock_status = NOT_STARTED;
 	AsyncWait setClock_AsyncWait;

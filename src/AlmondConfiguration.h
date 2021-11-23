@@ -1,22 +1,21 @@
 #pragma once
 
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
 #include "ApplicationConstants.h"
 #include "Logger.h"
 #include "TimerOverride.h"
 
-
-//Types------------------------------------------------------------------------
+// Types------------------------------------------------------------------------
 class AlmondConfiguration
 {
-public:
+	public:
 	static void setup();
 	void loop();
 
 	static unsigned int get_free_heap();
 
-protected:
+	protected:
 	static void setup_i2c();
 	static void setup_fs();
 	static void setup_led_outputs();

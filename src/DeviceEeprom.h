@@ -1,16 +1,15 @@
 #pragma once
 
-//Includes---------------------------------------------------------------------
-#include "AlmondPrecompiled.h"
+// Includes---------------------------------------------------------------------
 #include "AlmondConfiguration.h"
+#include "AlmondPrecompiled.h"
 
-#define EEPROM_END		0
-#define EEPROM_START	1
+#define EEPROM_END 0
+#define EEPROM_START 1
 
-
-//Types------------------------------------------------------------------------
+// Types------------------------------------------------------------------------
 void readCredentials();
 bool needEraseEEPROM();
 void clearParam();
-void writeEEPROM(int address, char *data, int size);
-int readEEPROM(int address, char *buff);
+void writeEEPROM(int address, char* data, int size);
+int readEEPROM(int address, char* buff);

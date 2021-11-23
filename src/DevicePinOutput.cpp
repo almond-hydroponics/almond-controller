@@ -1,15 +1,9 @@
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #include "DevicePinOutput.h"
 
-
-//Implementation---------------------------------------------------------------
-DevicePinOutput::DevicePinOutput(
-	const char *name,
-	uint8_t pin,
-	bool invert
-)
-	:
-	DeviceOutput(name)
+// Implementation---------------------------------------------------------------
+DevicePinOutput::DevicePinOutput(const char* name, uint8_t pin, bool invert)
+		: DeviceOutput(name)
 {
 	this->pin = pin;
 	this->invert = invert;
@@ -26,7 +20,8 @@ void DevicePinOutput::set_value(int value, bool verbose)
 	bool write_value = !invert ? (value != 0) : (value == 0);
 	digitalWrite(this->pin, write_value);
 
-	if (this->value != value && verbose) {
+	if (this->value != value && verbose)
+	{
 		LOG_INFO("Device '%s' status now: %d", this->name, value);
 	}
 	this->value = value;

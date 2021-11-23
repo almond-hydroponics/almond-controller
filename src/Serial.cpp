@@ -1,14 +1,13 @@
-//Includes---------------------------------------------------------------------
-#include "AlmondPrecompiled.h"
+// Includes---------------------------------------------------------------------
 #include "Serial.h"
+#include "AlmondPrecompiled.h"
 
 static const int BUFFER_SIZE = 64;
 
 static char BUFFER[BUFFER_SIZE];
 
-
-//Implementation---------------------------------------------------------------
-void serial_setup(const char *name, int baudrate)
+// Implementation---------------------------------------------------------------
+void serial_setup(const char* name, int baudrate)
 {
 	Serial.begin(baudrate);
 	Serial.write("***********************************\n");
@@ -16,13 +15,14 @@ void serial_setup(const char *name, int baudrate)
 	Serial.write("***********************************\n");
 }
 
-bool serial_process_number(const char *buffer, int buffer_n, int *convert)
+bool serial_process_number(const char* buffer, int buffer_n, int* convert)
 {
-	char *end_ptr;
-	int value = strtol((const char *)buffer, &end_ptr, 10);
-	if (end_ptr != buffer + buffer_n) {
+	char* end_ptr;
+	int value = strtol((const char*)buffer, &end_ptr, 10);
+	if (end_ptr != buffer + buffer_n)
+	{
 		Serial.write(" Invalid: '");
-		Serial.write((const char *)buffer);
+		Serial.write((const char*)buffer);
 		Serial.write("'\n");
 		return false;
 	}
@@ -31,17 +31,19 @@ bool serial_process_number(const char *buffer, int buffer_n, int *convert)
 	return true;
 }
 
-char *serial_receive(int *buffer_len)
+char* serial_receive(int* buffer_len)
 {
 
 	static int loop = 0;
 
 	// if there's any serial available, read it:
-	while (Serial.available() > 0) {
+	while (Serial.available() > 0)
+	{
 		// do it again:
 		BUFFER[loop] = Serial.read();
 
-		if (BUFFER[loop] == '\n') {
+		if (BUFFER[loop] == '\n')
+		{
 			BUFFER[loop] = 0x00;
 			*buffer_len = loop;
 			loop = 0;
@@ -49,24 +51,25 @@ char *serial_receive(int *buffer_len)
 		}
 
 		loop += 1;
-		if (loop >= 64) {
+		if (loop >= 64)
+		{
 			Serial.write("E: Too long line\n");
 			loop = 0;
 		}
-
 	}
 	return nullptr;
 }
 
-void serial_print_raw(const char *buffer, int len, bool line_change)
+void serial_print_raw(const char* buffer, int len, bool line_change)
 {
 	Serial.write(buffer, len);
-	if (line_change) {
+	if (line_change)
+	{
 		Serial.write("\n", 1);
 	}
 }
 
-void serial_print(const char *format, ...)
+void serial_print(const char* format, ...)
 {
 	va_list arg_list;
 	va_start(arg_list, format);
@@ -83,12 +86,14 @@ int serial_receive_number(int min_value, int max_value)
 	int number;
 	bool print_prompt = true;
 
-	while (true) {
-		if (print_prompt) {
+	while (true)
+	{
+		if (print_prompt)
+		{
 			Serial.write(">");
 			print_prompt = false;
 		}
-		char *buffer = serial_receive(&buffer_n);
+		char* buffer = serial_receive(&buffer_n);
 		if (buffer == nullptr)
 			continue;
 		Serial.write(buffer);
@@ -99,13 +104,16 @@ int serial_receive_number(int min_value, int max_value)
 		if (!serial_process_number(buffer, buffer_n, &number))
 			continue;
 
-		if (number < min_value) {
+		if (number < min_value)
+		{
 			serial_print("Too small number. Min %d\n", min_value);
 		}
-		else if (number > max_value) {
+		else if (number > max_value)
+		{
 			serial_print("Too large number. Max %d\n", max_value);
 		}
-		else {
+		else
+		{
 			return number;
 		}
 	}

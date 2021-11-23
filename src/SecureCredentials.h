@@ -1,6 +1,5 @@
 #pragma once
 
-
 const char CA_CERT_PROG[] PROGMEM = R"EOF(
 -----BEGIN CERTIFICATE-----
 MIIEZTCCA02gAwIBAgIQQAF1BIMUpMghjISpDBbN3zANBgkqhkiG9w0BAQsFADA/

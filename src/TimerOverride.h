@@ -1,13 +1,12 @@
 #pragma once
 
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #include "AlmondPrecompiled.h"
 
-
-//Types------------------------------------------------------------------------
+// Types------------------------------------------------------------------------
 class TimerOverride
 {
-public:
+	public:
 	TimerOverride();
 	// Use all time
 	void reset();
@@ -17,6 +16,7 @@ public:
 	bool check(unsigned long timeout_ms) const;
 	// @returns time since last reset
 	unsigned long elapsed() const;
-protected:
+
+	protected:
 	unsigned long reset_ms;
 };

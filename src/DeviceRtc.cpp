@@ -1,23 +1,21 @@
-//Includes---------------------------------------------------------------------
+// Includes---------------------------------------------------------------------
 #include "DeviceRtc.h"
 
-
-//Implementation---------------------------------------------------------------
-DeviceRtc::DeviceRtc(const char *name)
-	: DeviceInput(name)
-{
-}
+// Implementation---------------------------------------------------------------
+DeviceRtc::DeviceRtc(const char* name) : DeviceInput(name) {}
 
 void DeviceRtc::setup()
 {
 	LOG_INFO("RTC has booted.");
 
-	if (!rtc.begin()) {
+	if (!rtc.begin())
+	{
 		LOG_ERROR("Couldn't find RTC");
 		abort();
 	}
 
-	if (rtc.lostPower()) {
+	if (rtc.lostPower())
+	{
 		LOG_INFO("RTC lost power, lets set the time!");
 		// When time needs to be set on a new device, or after a power loss, the
 		// following line sets the RTC to the date & time this sketch was compiled
@@ -25,16 +23,18 @@ void DeviceRtc::setup()
 		// This line sets the RTC with an explicit date & time, for example to set
 		// January 21, 2014, at 3am you would call:
 		// rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
-	} else {
+	}
+	else
+	{
 		LOG_INFO("RTC is running.");
 	}
-//	RTC_DS3231::adjust(DateTime(F(__DATE__), F(__TIME__)));
-//	LOG_INFO("RTC is running!");
-//	DateTime now(value);
-//	LOG_INFO("Set time: %d:%d", now.hour(), now.minute());
+	//	RTC_DS3231::adjust(DateTime(F(__DATE__), F(__TIME__)));
+	//	LOG_INFO("RTC is running!");
+	//	DateTime now(value);
+	//	LOG_INFO("Set time: %d:%d", now.hour(), now.minute());
 }
 
-void DeviceRtc::time_of_day(Config_run_table_time *time)
+void DeviceRtc::time_of_day(Config_run_table_time* time)
 {
 	DateTime now(value);
 
@@ -50,12 +50,13 @@ void DeviceRtc::update_time(uint32_t ntp_time)
 
 void DeviceRtc::loop()
 {
-	if (!timer.check(1000)) return;
+	if (!timer.check(1000))
+		return;
 
 	timer.reset();
 	// Instantiate class to use the methods.
 	DateTime now = rtc.now();
-	// this loses one bit, math.log( 365*24*60*60*60 )/math.log(2) = 30.81738694131409,
-	// so we should be ok, until = 2030, that's ok.
+	// this loses one bit, math.log( 365*24*60*60*60 )/math.log(2)
+	// = 30.81738694131409, so we should be ok, until = 2030, that's ok.
 	value = now.unixtime();
 }
