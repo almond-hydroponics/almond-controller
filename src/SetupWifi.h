@@ -17,9 +17,7 @@ class SetupWifi
 	SetupWifi(const char* ssid_, const char* password_, const char* ca_cert_PROG_,
 	          const char* client_cert_PROG_, const char* client_key_PROG_)
 			: ssid(ssid_), password(password_), ca_cert_PROG(ca_cert_PROG_),
-				client_cert_PROG(client_cert_PROG_), client_key_PROG(client_key_PROG_)
-
-				,
+				client_cert_PROG(client_cert_PROG_), client_key_PROG(client_key_PROG_),
 				x509CaCert(ca_cert_PROG), x509ClientCert(client_cert_PROG),
 				PrivateClientKey(client_key_PROG)
 	{

@@ -29,15 +29,6 @@
 #define STAPSK CONSTANTS.wlan.password
 #endif
 
-const char* ssid = STASSID;
-const char* password = STAPSK;
-const char* mqttServer = CONSTANTS.mqtt.mqtt_server;
-const char* mqttUsername = CONSTANTS.mqtt.mqtt_user;
-const char* mqttPassword = CONSTANTS.mqtt.mqtt_password;
-const char* mqttClientName = "almond_mqtt_" MAJOR_VER "_" MINOR_VER;
-const char* firebaseFcmServerKey = CONSTANTS.firebase.firebase_server_key;
-short mqttPort = CONSTANTS.mqtt.mqtt_port;
-
 const char* ID = "sec_mqtt_client_" MAJOR_VER "_" MINOR_VER;
 
 // Declarations-----------------------------------------------------------------
@@ -53,14 +44,16 @@ DevicePinInput DEV_WDETECT("water_detect", PIN_WDETECT, 4, true);
 ApplicationLogic APPLICATION_LOGIC;
 
 // Wifi declaration
-SetupWifi setupWifi(ssid, password, CA_CERT_PROG, CLIENT_CERT_PROG,
+SetupWifi setupWifi(STASSID, STAPSK, CA_CERT_PROG, CLIENT_CERT_PROG,
                     CLIENT_KEY_PROG
                     //		DeviceRtc(nullptr)
 );
 
 // Mqtt client declaration
-MqttServer mqttClient(mqttServer, mqttUsername, mqttPassword,
-                      setupWifi.getWiFiClient(), mqttClientName, mqttPort);
+MqttServer mqttClient(CONSTANTS.mqtt.mqtt_server, CONSTANTS.mqtt.mqtt_user,
+                      CONSTANTS.mqtt.mqtt_password, setupWifi.getWiFiClient(),
+                      reinterpret_cast<const char*>(ESP.getChipId()),
+                      CONSTANTS.mqtt.mqtt_port);
 
 // Firebase data object declaration
 FirebaseData firebaseDto;
@@ -84,6 +77,28 @@ class Device_status : public DeviceInput
 	public:
 	Device_status() : DeviceInput("status"){};
 	void loop() override { this->value = (int)LOG.get_status(); };
+};
+
+class Topic
+{
+	private:
+	std::unique_ptr<char> topic{};
+
+	public:
+	explicit Topic(const char size) { topic = std::make_unique<char>(size); }
+	std::unique_ptr<char> getTopic() {
+			return topic;
+	};
+};
+
+class TopicObject
+{
+	public:
+	TopicObject() : _ptr(new char) { }
+	~TopicObject() { delete this->_ptr; }
+
+	private:
+	char* _ptr;
 };
 
 Device_uptime DEV_UPTIME;
@@ -136,7 +151,7 @@ static int generate_device_json(char* buffer)
 {
 	strcpy(buffer, "{\"dev\":[");
 	int buffer_offset = strlen(buffer);
-	unsigned int loop;
+	unsigned int loop = 0;
 	for (loop = 0; loop < DEVICES_N; loop++)
 	{
 		Device* dev = DEVICES[loop];
@@ -219,8 +234,8 @@ static int raw_device_json(char* buffer)
 {
 	const int buffer_size = MESSAGE_MAX_LEN;
 	int buffer_offset = snprintf(buffer, buffer_size, "{");
-	unsigned int loop;
-	int ret;
+	unsigned int loop = 0;
+	int ret = 0;
 
 	for (loop = 0; loop < LOGGED_DEVICES; loop++)
 	{
@@ -270,13 +285,14 @@ static bool handle_push_devices(bool force)
 		return false;
 	raw_device_json(buffer);
 
-	char* topic_data = (char*)malloc(40);
-	sprintf(topic_data, "%08X/data", ESP.getChipId());
+//	char* topic_data = (char*)malloc(40);
+	Topic topic(40);
+//	sprintf(topicObject, "%08X/data", ESP.getChipId());
 
 	// send data through publish topic
-	bool ret = mqttClient.publish(topic_data, buffer);
+	bool ret = mqttClient.publish(topic, buffer);
 
-	free(topic_data);
+//	free(topic_data);
 	free(buffer);
 
 	return ret;
@@ -431,7 +447,7 @@ void setup()
 #ifndef NDEBUG
 static void handle_serial()
 {
-	int line_len;
+	int line_len = 0;
 	char* line = serial_receive(&line_len);
 
 	if (line == nullptr)

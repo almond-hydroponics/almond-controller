@@ -4,8 +4,10 @@
 #include "TimerOverride.h"
 #include <ESP8266WiFi.h>
 
+#define BAUD_RATE 9600
+
 // Types------------------------------------------------------------------------
-typedef void (*LoggerFatalHook)(const char* error_line);
+using LoggerFatalHook = void (*)(const char *);
 
 class Logger
 {
@@ -30,7 +32,7 @@ class Logger
 
 	Logger();
 
-	void setup_serial(const char* hostname, int baudrate = 9600);
+	void setup_serial(const char* hostname, int baudrate = BAUD_RATE);
 	void setup_led(int _led_pin);
 	void setup_fatal_hook(LoggerFatalHook hook);
 
@@ -46,12 +48,12 @@ class Logger
 
 	private:
 	TimerOverride led_timer;
-	LoggerFatalHook fatal_hook;
-	int line_loop;
-	int serial_baudrate;
-	int led_pin;
+	LoggerFatalHook fatal_hook{nullptr};
+	int line_loop{0};
+	int serial_baudrate{0};
+	int led_pin{-1};
 	bool led_state{};
-	Logger::Status status;
+	Logger::Status status{Status::BOOTING};
 	char buffer[max_lines * max_line_len]{};
 	char format[max_line_len]{};
 };
@@ -67,11 +69,7 @@ void get_uptime(InfoUptime* uptime);
 
 extern Logger LOG;
 
-#define LOG_INFO(format, ...)                                                  \
-	LOG.log(Logger::Level::INFO, F(format), ##__VA_ARGS__)
-#define LOG_WARN(format, ...)                                                  \
-	LOG.log(Logger::Level::WARNING, F(format), ##__VA_ARGS__)
-#define LOG_ERROR(format, ...)                                                 \
-	LOG.log(Logger::Level::ERROR, F(format), ##__VA_ARGS__)
-#define LOG_FATAL(format, ...)                                                 \
-	LOG.log(Logger::Level::FATAL, F(format), ##__VA_ARGS__)
+#define LOG_INFO(format, ...)::Logger::Level::INFO, F(format), ##__VA_ARGS__
+#define LOG_WARN(format, ...)::Logger::Level::WARNING, F(format), ##__VA_ARGS__
+#define LOG_ERROR(format, ...)::Logger::Level::ERROR, F(format), ##__VA_ARGS__
+#define LOG_FATAL(format, ...)::Logger::Level::FATAL, F(format), ##__VA_ARGS__

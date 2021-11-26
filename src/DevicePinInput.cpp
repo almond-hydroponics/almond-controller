@@ -4,12 +4,9 @@
 // Implementation---------------------------------------------------------------
 DevicePinInput::DevicePinInput(const char* name, uint8_t pin,
                                uint8_t filter_len, bool invert)
-		: DeviceInput(name)
+		: DeviceInput(name), filter_sum(0), pin(pin), filter_len(filter_len),
+			invert(invert)
 {
-	this->pin = pin;
-	this->filter_len = filter_len;
-	this->filter_sum = 0;
-	this->invert = invert;
 	this->value = -1;
 }
 
@@ -23,7 +20,7 @@ void DevicePinInput::loop()
 	timer.reset();
 
 	int val = digitalRead(this->pin);
-	val = !invert ? (val != 0) : (val == 0);
+	val = !invert == (val != 0);
 
 	this->filter_sum += (val * 2 - 1);
 

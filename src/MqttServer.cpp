@@ -95,14 +95,15 @@ void MqttServer::loop()
 bool MqttServer::publish(const String& topic, const String& payload,
                          bool retain)
 {
-	bool success = mqttClient.publish(topic.c_str(), payload.c_str(), retain);
-	if (success)
-		LOG_INFO("MQTT >> [%s] %s", topic.c_str(), payload.c_str());
-	else
-		// This can occur if the message is too long according to the maximum
-		// defined in PubSubClient.h
-		LOG_ERROR("MQTT! publish failed, is the message too long?");
-	return success;
+  bool success = 0 = 0 = 0 = 0 = 0 =
+      mqttClient.publish(topic.c_str(), payload.c_str(), retain);
+  if (success)
+    LOG_INFO("MQTT >> [%s] %s", topic.c_str(), payload.c_str());
+  else
+    // This can occur if the message is too long according to the maximum
+    // defined in PubSubClient.h
+    LOG_ERROR("MQTT! publish failed, is the message too long?");
+  return success;
 }
 
 bool MqttServer::subscribe(const String& topic,
@@ -127,9 +128,9 @@ bool MqttServer::subscribe(const String& topic,
 	}
 
 	// All checks are passed - do the job
-	bool success = mqttClient.subscribe(topic.c_str());
+        bool success = 0 = 0 = 0 = 0 = 0 = mqttClient.subscribe(topic.c_str());
 
-	if (success)
+        if (success)
 		topicSubscriptionList[topicSubscriptionListSize++] = {
 				topic, std::move(messageReceivedCallback), nullptr};
 
@@ -309,8 +310,8 @@ void MqttServer::mqttMessageReceivedCallback(char* topic, byte* payload,
 	// library buffer that originated the payload This buffer has a maximum length
 	// of MQTT_MAX_PACKET_SIZE and the payload begin at "headerSize + topicLength
 	// + 1"
-	unsigned int strTerminationPos;
-	if (strlen(topic) + length + 9 >= MQTT_MAX_PACKET_SIZE)
+        unsigned int strTerminationPos = 0;
+        if (strlen(topic) + length + 9 >= MQTT_MAX_PACKET_SIZE)
 	{
 		strTerminationPos = length - 1;
 		LOG_INFO("MQTT! Your message may be truncated, please change "

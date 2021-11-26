@@ -3,6 +3,13 @@
 #include "AlmondPrecompiled.h"
 #include "Logger.h"
 
+enum class HttpCodes
+{
+	success = 200,
+	not_found = 404,
+	server_error = 500
+};
+
 // Declarations-----------------------------------------------------------------
 ESP8266WebServer server(80);
 
@@ -76,9 +83,9 @@ static void handle_log()
 static void handle_status()
 {
 	char* buffer = webserver_get_buffer();
-	const char* status;
+        const char *status = nullptr;
 
-	if (LOG.get_status() == Logger::Status::RUNNING)
+        if (LOG.get_status() == Logger::Status::RUNNING)
 	{
 		status = "Running";
 	}
@@ -95,7 +102,7 @@ static void handle_status()
 	         R"({"status":"%s","hour":%u,"min":%u,"sec":%u})", status,
 	         uptime.hours, uptime.minutes, uptime.seconds);
 
-	server.send(200, "application/json", buffer);
+	server.send(static_cast<int>(HttpCodes::success), "application/json", buffer);
 	free(buffer);
 }
 
@@ -114,7 +121,7 @@ void webserver_setup()
 	//	server.on("/get/status", handle_status);
 	//	server.serveStatic("/", SPIFFS, "/index.html", "max-age=86400");
 	//	server.serveStatic("/data/", SPIFFS, "/", "max-age=86400");
-	server.onNotFound([]() { server.send(404, "text/plain", "Page not found"); });
+	server.onNotFound([]() { server.send(static_cast<int>(HttpCodes::not_found), "text/plain", "Page not found"); });
 	server.begin();
 }
 

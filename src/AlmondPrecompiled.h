@@ -10,6 +10,7 @@
 #include <WiFiClientSecure.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
+#include <LittleFS.h>
 
 #include <climits>
 #include <cstdarg>

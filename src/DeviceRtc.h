@@ -19,6 +19,6 @@ class DeviceRtc : public DeviceInput
 	void time_of_day(Config_run_table_time* time);
 
 	protected:
-	RTC_DS3231 rtc;
-	TimerOverride timer;
+          RTC_DS3231 rtc{};
+          TimerOverride timer;
 };

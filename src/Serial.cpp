@@ -17,14 +17,13 @@ void serial_setup(const char* name, int baudrate)
 
 bool serial_process_number(const char* buffer, int buffer_n, int* convert)
 {
-	char* end_ptr;
-	int value = strtol((const char*)buffer, &end_ptr, 10);
-	if (end_ptr != buffer + buffer_n)
-	{
-		Serial.write(" Invalid: '");
-		Serial.write((const char*)buffer);
-		Serial.write("'\n");
-		return false;
+  char *end_ptr = nullptr;
+  int value = strtol((const char *)buffer, &end_ptr, 10);
+  if (end_ptr != buffer + buffer_n) {
+    Serial.write(" Invalid: '");
+    Serial.write((const char *)buffer);
+    Serial.write("'\n");
+    return false;
 	}
 
 	*convert = value;
@@ -83,8 +82,8 @@ void serial_print(const char* format, ...)
 int serial_receive_number(int min_value, int max_value)
 {
 	int buffer_n = 0;
-	int number;
-	bool print_prompt = true;
+        int number = 0;
+        bool print_prompt = true;
 
 	while (true)
 	{

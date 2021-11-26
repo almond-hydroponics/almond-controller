@@ -20,7 +20,7 @@ void AlmondConfiguration::setup_i2c() { Wire.begin(PIN_SDA, PIN_SCL); }
 
 void AlmondConfiguration::setup_fs()
 {
-	bool mounted = SPIFFS.begin();
+	bool mounted = LittleFS.begin();
 	if (mounted)
 	{
 		LOG_INFO("FS ok.");

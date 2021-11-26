@@ -9,11 +9,6 @@ Logger LOG;
 
 Logger::Logger()
 {
-	this->status = Status::BOOTING;
-	this->led_pin = -1;
-	this->line_loop = 0;
-	this->serial_baudrate = 0;
-	this->fatal_hook = nullptr;
 	memset(this->buffer, 0x00, sizeof(this->buffer));
 	memset(this->format, 0x00, sizeof(this->format));
 }
